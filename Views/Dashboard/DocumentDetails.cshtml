@@ -1,0 +1,13 @@
+@model DocumentDrillFilter
+@using Vtb.Hr.Web.Services
+@{ViewData["Title"]="Danh sách hồ sơ - "+(Model.State=="BLANK"?"(Trống)":Labels.Text(Model.State));}
+<link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+<section id="document-drill" data-api="@Url.Action("DocumentDetailsData")" data-back="@Url.Action("Index")">
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><h1 class="page-title">@ViewData["Title"]</h1><a id="drill-back" class="btn" asp-action="Index">Quay lại tổng quan</a></div>
+<span class="badge bg-@Labels.Color(Model.State)-lt mb-3 document-state-@Model.State">@(Model.State=="BLANK"?"(Trống)":Labels.Text(Model.State))</span>
+<div class="card"><div class="card-header"><form id="drill-search" class="d-flex gap-2 w-100"><label class="visually-hidden" for="drill-term">Tìm mã cán bộ, họ tên, hồ sơ</label><input id="drill-term" maxlength="100" class="form-control" placeholder="Mã cán bộ, họ tên, mã hoặc tên hồ sơ" value="@Model.Search"/><button type="submit" class="btn btn-primary">Tìm</button></form></div>
+<div id="drill-error" class="alert alert-danger m-3" hidden role="alert"></div><div class="table-responsive"><table class="table table-vcenter overview-table"><thead><tr>@foreach(var c in new[]{("id","Mã nhân viên"),("name","Họ tên"),("department","Phòng ban"),("code","Mã hồ sơ"),("document","Tên hồ sơ"),("issueDate","Ngày cấp"),("expiryDate","Ngày hết hạn"),("days","Thời hạn còn lại"),("requiredStorage","Hình thức lưu trữ yêu cầu"),("storage","Hình thức lưu trữ"),("reason","Lý do không hợp lệ")}){<th aria-sort="@(Model.Sort==c.Item1?(Model.Desc?"descending":"ascending"):"none")"><button class="table-sort-button" type="button" data-sort="@c.Item1">@c.Item2</button></th>}</tr></thead><tbody id="drill-rows"><tr><td colspan="11">Đang tải…</td></tr></tbody></table></div>
+<div class="card-footer d-flex justify-content-between align-items-center gap-2 flex-wrap"><span id="drill-page" role="status" aria-live="polite"></span><div class="d-flex gap-2"><select id="drill-size" class="form-select" aria-label="Số dòng mỗi trang">@foreach(var size in new[]{20,50,100}){<option value="@size" selected="@(Model.PageSize==size)">@size</option>}</select><button type="button" class="btn" id="drill-prev" disabled>Trước</button><button type="button" class="btn" id="drill-next" disabled>Sau</button></div></div></div>
+</section>
+@section Scripts {<script src="~/js/document-drill.js" asp-append-version="true"></script>}
+

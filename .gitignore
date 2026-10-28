@@ -1,0 +1,10 @@
+bin/
+obj/
+.cli/
+.nuget/
+.scaffold/
+.vs/
+appsettings.Local.json
+.keys/
+.tools/
+App_Data/

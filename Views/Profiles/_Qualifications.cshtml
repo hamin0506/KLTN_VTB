@@ -1,0 +1,11 @@
+@model ProfileModel
+@using Vtb.Hr.Web.Services
+@using Vtb.Hr.Web.Security
+@inject IConfiguration Config
+@{var canEdit=Access.Admin(User,Config);}
+<section class="card mb-4"><div class="card-header flex-wrap gap-2"><h2 class="card-title">Trình độ chuyên môn</h2>@if(canEdit){<a class="btn btn-primary ms-auto" asp-controller="Catalog" asp-action="Create" asp-route-kind="qualifications" asp-route-employeeId="@Model.Employee.EmployeeId">Thêm văn bằng</a>}</div>
+@if(Model.Qualifications.Count==0){<div class="card-body text-secondary">Chưa có thông tin văn bằng.</div>}else{
+<div class="table-responsive"><table class="table table-vcenter"><thead><tr><th>Trình độ</th><th>Tên văn bằng</th><th>Chuyên ngành</th><th>Cơ sở đào tạo</th><th>Ngày tốt nghiệp</th><th>Ghi chú</th><th>Thao tác</th></tr></thead><tbody>
+@foreach(var degree in Model.Qualifications){<tr><td>@degree.QualificationLevel</td><td>@ProfilePresentation.Text(degree.DegreeName)</td><td>@ProfilePresentation.Text(degree.Major)</td><td>@ProfilePresentation.Text(degree.Institution)</td><td>@QualityService.Date(degree.GraduationDate)</td><td class="text-break">@ProfilePresentation.Text(degree.Notes)</td><td>@if(canEdit){<a class="me-3" asp-controller="Catalog" asp-action="Edit" asp-route-kind="qualifications" asp-route-id="@degree.QualificationId">Sửa</a><a class="text-danger" asp-controller="Catalog" asp-action="Delete" asp-route-kind="qualifications" asp-route-id="@degree.QualificationId">Xóa</a>}else{<span>Chỉ xem</span>}</td></tr>}
+</tbody></table></div>}
+</section>

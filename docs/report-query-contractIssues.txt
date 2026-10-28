@@ -1,0 +1,31 @@
+DECLARE @f_DivisionIds1 int = 1;
+DECLARE @term_contains nvarchar(4000) = N'%'' OR 1=1 --%';
+DECLARE @p int = 20;
+
+SELECT [s].[Code], [s].[IssueDate], [s].[Days], [s].[Id], [s].[Name], [s].[Department], [s].[Employment], [s].[Status]
+FROM (
+    SELECT DISTINCT NULL AS [Code], NULL AS [IssueDate], NULL AS [Days], [v].[employee_id] AS [Id], [v].[full_name] AS [Name], [v].[department_name] AS [Department], CASE
+        WHEN [e0].[employment_status] = 'DangLamViec' THEN N'Đang làm việc'
+        WHEN [e0].[employment_status] = 'TamHoanHDLD' THEN N'Tạm hoãn HĐLĐ'
+        WHEN [e0].[employment_status] = 'ChamDutHDLD' THEN N'Chấm dứt HĐLĐ'
+        WHEN [e0].[employment_status] = 'NghiHuu' THEN N'Nghỉ hưu'
+        ELSE N''
+    END AS [Employment], CASE
+        WHEN [v].[labor_contract_status] = N'HOP_LE' THEN N'Hợp lệ'
+        WHEN [v].[labor_contract_status] = N'THIEU_HDXDTH1' THEN N'Thiếu HĐXĐTH1'
+        WHEN [v].[labor_contract_status] = N'CAN_KY_KET_TIEP' THEN N'Cần ký kết tiếp'
+        WHEN [v].[labor_contract_status] = N'KHONG_CANH_BAO' THEN N'Không cảnh báo'
+    END AS [Status]
+    FROM [dbo].[vw_labor_contract_check] AS [v]
+    INNER JOIN [dbo].[employee] AS [e0] ON [v].[employee_id] = [e0].[employee_id]
+    WHERE [v].[employee_id] IN (
+        SELECT [e].[employee_id]
+        FROM [dbo].[employee] AS [e]
+        WHERE EXISTS (
+            SELECT 1
+            FROM [dbo].[department] AS [d]
+            WHERE [d].[department_id] = [e].[department_id] AND [d].[division_id] = @f_DivisionIds1)
+    ) AND [v].[labor_contract_status] NOT IN (N'HOP_LE', N'KHONG_CANH_BAO') AND ([v].[employee_id] LIKE @term_contains ESCAPE N'\' OR [v].[full_name] LIKE @term_contains ESCAPE N'\' OR [v].[department_name] LIKE @term_contains ESCAPE N'\')
+) AS [s]
+ORDER BY [s].[Id], [s].[Name], [s].[Department], [s].[Employment], [s].[Status]
+OFFSET @p ROWS FETCH NEXT @p ROWS ONLY

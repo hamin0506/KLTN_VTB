@@ -1,0 +1,2 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');const ctx={window:{}};vm.createContext(ctx);vm.runInContext(fs.readFileSync('wwwroot/js/overview-layout.js','utf8'),ctx);const height=ctx.window.OverviewLayout.chartHeight;
+assert.equal(height(320,700,true),700);assert.equal(height(1060,700,true),1060);assert.equal(height(320,700,false),320);console.log('PASS plot fills desktop stack, preserves tall data and restores natural mobile height.');

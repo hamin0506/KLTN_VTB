@@ -1,0 +1,18 @@
+﻿@model ProfileDocumentSection
+@using Vtb.Hr.Web.Services
+@using Vtb.Hr.Web.Security
+@inject IConfiguration Config
+@{var groups=ProfilePresentation.Groups(Model.Profile);var admin=Access.Admin(User,Config);var quality=Model.Profile.DocumentQualityRows.ToLookup(x=>x.DocumentId);}
+@foreach(var group in groups){
+var documents=group.Documents.Where(x=>x.IsCurrent==Model.IsCurrent).ToList();
+<details class="profile-document-group" open>
+<summary><svg class="menu-icon" aria-hidden="true"><use href="/icons.svg#file" /></svg><span class="profile-group-title">@group.Title</span><span class="badge bg-blue-lt">@documents.Count tài liệu</span><svg class="profile-group-chevron menu-icon" aria-hidden="true"><use href="/icons.svg#chevron-right" /></svg></summary>
+@if(documents.Count==0){<p class="text-secondary p-3 mb-0">Chưa có tài liệu trong nhóm này.</p>}else{
+<div class="table-responsive"><table class="table profile-document-table"><thead><tr><th>Loại / tên tài liệu</th><th>Ngày cấp</th><th>Ngày hết hạn</th><th>Chất lượng</th><th>Lưu trữ</th><th>Phiên bản</th><th>Thao tác</th></tr></thead><tbody>
+@foreach(var item in documents){var type=Model.Profile.DocumentTypes.GetValueOrDefault(item.DocumentTypeId);var states=quality[item.DocumentId].Select(x=>x.QualityStatus).Distinct().ToList();
+<tr data-document-id="@item.DocumentId"><td><strong>@(type?.DocumentName??Model.Profile.TypeNames.GetValueOrDefault(item.DocumentTypeId)??"Chưa xác định loại tài liệu")</strong>@if(!string.IsNullOrWhiteSpace(type?.DocumentCode)){<div class="text-secondary small">@type.DocumentCode</div>}@if(!string.IsNullOrWhiteSpace(item.SpecificName)){<div>@item.SpecificName</div>}</td><td>@QualityService.Date(item.IssueDate)</td><td>@QualityService.Date(item.ExpiryDate)</td>
+<td>@if(states.Count==0){<span class="profile-status profile-status--unknown">Chưa có kết quả</span>}else{<div class="profile-status-list">@foreach(var state in states){<span class="profile-status profile-status--@ProfilePresentation.StateClass(state)">@ProfilePresentation.StateLabel(state)</span>}</div>}</td>
+<td title="@(DocumentStorageForms.Normalize(item.StorageForm) is null?DocumentStorageForms.EmptyDescription:null)">@DocumentStorageForms.Display(item.StorageForm)</td><td>@(item.IsCurrent?"Hiện hành":"Lịch sử")</td><td><div class="profile-document-actions"><partial name="~/Views/Shared/_DocumentFileEye.cshtml" model="item"/><a asp-controller="Catalog" asp-action="Details" asp-route-kind="documents" asp-route-id="@item.DocumentId">Chi tiết</a>@if(admin){<a asp-controller="Catalog" asp-action="Edit" asp-route-kind="documents" asp-route-id="@item.DocumentId">Sửa</a><a class="text-danger" asp-controller="Catalog" asp-action="Delete" asp-route-kind="documents" asp-route-id="@item.DocumentId">Xóa</a>}</div></td></tr>
+}
+</tbody></table></div>}
+</details>}

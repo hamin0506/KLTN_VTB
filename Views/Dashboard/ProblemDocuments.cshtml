@@ -1,0 +1,30 @@
+﻿@{ViewData["Title"]="Chất lượng hồ sơ";}
+<link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true"/>
+<link rel="stylesheet" href="~/css/reports.css" asp-append-version="true"/>
+<section class="secondary-report" id="secondary-report" data-report="problem" data-api="@Url.Action("ProblemData")" data-options="@Url.Action("ReportOptions")" data-table="@Url.Action("ReportTable")">
+<h1 class="page-title mb-2">Theo dõi chất lượng dữ liệu hồ sơ</h1><p class="text-secondary">Phân tích các vấn đề chất lượng dữ liệu theo loại hồ sơ, phòng ban và nguyên nhân (Không bao gồm HĐLĐ).</p><partial name="_ReportTabs"/>
+<partial name="_ReportFilters" model='@("problem")'/>
+<div id="report-error" class="alert alert-danger" hidden role="alert"></div><div id="report-status" class="text-secondary mb-3" role="status"></div>
+<div class="dashboard-kpi-grid report-kpis">
+@foreach(var k in new[]{("total","Tổng yêu cầu hồ sơ","total"),("rate","Tỷ lệ đáp ứng hồ sơ","complete"),("missing","Hồ sơ đang thiếu","missing")}){<div class="dashboard-kpi-card"><div class="dashboard-kpi-label">@k.Item2</div><div class="dashboard-kpi-value dashboard-kpi-value--@k.Item3" data-report-kpi="@k.Item1">—</div></div>}
+</div>
+<div class="report-charts-grid">
+<div class="card report-chart-card"><div class="card-header"><h2 class="card-title">Hồ sơ đang thiếu theo loại tài liệu</h2></div><div class="dashboard-chart-viewport" tabindex="0" role="region" aria-label="Hồ sơ đang thiếu theo loại tài liệu"><div id="report-chart-first" class="overview-chart" role="img" aria-label="Hồ sơ đang thiếu theo loại tài liệu"></div></div></div>
+<div class="card report-chart-card"><div class="card-header"><h2 class="card-title" id="problem-org-title">Tỷ lệ đáp ứng hồ sơ theo đơn vị</h2></div><div class="dashboard-chart-viewport" tabindex="0" role="region" aria-label="Tỷ lệ đáp ứng hồ sơ theo phòng ban"><div class="problem-org-controls"><div class="problem-org-modes" role="group" aria-label="Chế độ tỷ lệ đáp ứng">
+<button type="button" class="btn btn-sm active" id="problem-mode-division" aria-pressed="true">Theo đơn vị</button>
+<button type="button" class="btn btn-sm" id="problem-mode-all" aria-pressed="false">Tất cả phòng ban</button>
+<button type="button" class="btn btn-sm" id="problem-mode-detail" aria-pressed="false">Chi tiết đơn vị</button>
+</div><label id="problem-division-label" hidden>Đơn vị <select id="problem-division" class="form-select form-select-sm" aria-label="Chọn đơn vị để xem phòng ban"></select></label><span id="problem-org-path" role="status">Theo đơn vị · Nhấn thanh để xem phòng ban</span><button id="problem-org-back" type="button" class="btn btn-sm" hidden>Quay lại theo đơn vị</button></div><div id="report-chart-second" class="overview-chart" role="img" aria-label="Tỷ lệ đáp ứng hồ sơ theo phòng ban"></div></div></div>
+</div>
+<section class="card problem-table-tabs" aria-labelledby="problem-tables-title">
+<div class="card-header"><h2 class="card-title" id="problem-tables-title">Danh sách hồ sơ cần theo dõi</h2></div>
+<div class="nav nav-tabs px-3" role="tablist" aria-label="Danh sách hồ sơ">
+<button type="button" class="nav-link active" id="problem-tab" role="tab" aria-selected="true" aria-controls="problem-panel">Tài liệu có vấn đề</button>
+<button type="button" class="nav-link" id="expiring-tab" role="tab" aria-selected="false" aria-controls="expiring-panel" tabindex="-1">Hồ sơ sắp hết hạn</button>
+</div>
+<div id="problem-panel" role="tabpanel" aria-labelledby="problem-tab"><partial name="_ReportTables" model='@("problemTable")'/></div>
+<div id="expiring-panel" role="tabpanel" aria-labelledby="expiring-tab" hidden><partial name="_ReportTables" model='@("expiring")'/></div>
+</section>
+
+</section>
+@section Scripts{<script src="~/lib/echarts/echarts.min.js" asp-append-version="true"></script><script src="~/js/problem-report.js" asp-append-version="true"></script><script src="~/js/reports.js" asp-append-version="true"></script>}

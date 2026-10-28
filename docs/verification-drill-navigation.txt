@@ -1,0 +1,1 @@
+PASS: dynamic state, all organization selections, status, return search/sort/page, independent detail search, SQL error UI. No live SQL or browser layout tested.

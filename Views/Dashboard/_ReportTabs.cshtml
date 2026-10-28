@@ -1,0 +1,6 @@
+@{var action=ViewContext.RouteData.Values["action"]?.ToString();}
+<nav class="report-tabs mb-4" aria-label="Trang báo cáo">
+@foreach(var tab in new[]{("Index","Tổng quan"),("ProblemDocuments","Chất lượng hồ sơ"),("Contract","Hợp đồng lao động")}){
+<a class="report-tab @(action==tab.Item1?"active":"")" asp-controller="Dashboard" asp-action="@tab.Item1" aria-current="@(action==tab.Item1?"page":null)">@tab.Item2</a>
+}
+</nav>

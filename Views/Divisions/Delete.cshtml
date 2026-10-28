@@ -1,0 +1,3 @@
+@model Vtb.Hr.Web.Data.Division
+@{ViewData["Title"]="Xác nhận xóa đơn vị";}
+<h1 class="page-title mb-4">Xác nhận xóa đơn vị</h1><div class="card"><div class="card-body"><div class="alert alert-warning">Thao tác xóa không thể hoàn tác. Đơn vị có phòng ban trực thuộc sẽ không được xóa.</div><h2>@Model.DivisionName</h2><p class="text-secondary">Mã đơn vị: @Model.DivisionCode</p></div><form class="card-footer text-end" asp-action="Delete" asp-route-id="@Model.DivisionId" method="post"><a class="btn me-2" asp-action="Index">Hủy</a><button class="btn btn-danger" type="submit">Xác nhận xóa</button></form></div>

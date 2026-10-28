@@ -1,0 +1,23 @@
+﻿@model ProfileModel
+@using Vtb.Hr.Web.Services
+@using Vtb.Hr.Web.Security
+@inject IConfiguration Config
+@{var groups=ProfilePresentation.Groups(Model);var admin=Access.Admin(User,Config);var currentCount=Model.Documents.Count(x=>x.IsCurrent);var historyCount=Model.Documents.Count-currentCount;}
+<div class="card"><div class="card-header flex-wrap gap-2"><h2 class="card-title">Tài liệu của cán bộ</h2>@if(admin){<a class="btn btn-primary ms-auto" asp-controller="Catalog" asp-action="Create" asp-route-kind="documents" asp-route-employeeId="@Model.Employee.EmployeeId">+ Thêm tài liệu</a>}</div>
+<div class="card-body">
+<p class="text-secondary small" id="profile-document-counts">Tổng: @Model.Documents.Count tài liệu · Hiện hành: @currentCount · Lịch sử: @historyCount</p>
+@if(groups.Any(x=>x.Unexpected)){<div class="alert alert-warning" role="status">Danh mục có nhóm ngoài ba nhóm dự kiến hoặc tài liệu chưa xác định nhóm: @string.Join("; ",groups.Where(x=>x.Unexpected).Select(x=>x.Title)). Các nhóm này được giữ riêng bên dưới, không tự gán sang nhóm khác.</div>}
+@if(Model.Documents.Count==0){<p class="text-secondary">Chưa có tài liệu.</p>}
+<section aria-labelledby="current-documents-title">
+<h3 id="current-documents-title" class="h3 mb-3">Hồ sơ hiện hành</h3>
+<partial name="~/Views/Profiles/_DocumentSection.cshtml" model="new ProfileDocumentSection(Model, true)"/>
+</section>
+<details class="profile-document-group profile-document-history" id="historical-documents">
+<summary><svg class="menu-icon" aria-hidden="true"><use href="/icons.svg#file" /></svg><span class="profile-group-title">Tài liệu lịch sử <small class="d-block text-secondary fw-normal">Nhấn để mở hoặc thu gọn</small></span><span class="badge bg-secondary-lt">@historyCount tài liệu</span><svg class="profile-group-chevron menu-icon" aria-hidden="true"><use href="/icons.svg#chevron-right" /></svg></summary>
+<div class="p-3">
+@if(!Model.Documents.Any(x=>!x.IsCurrent)){<p class="text-secondary mb-0">Chưa có tài liệu lịch sử.</p>}else{
+<partial name="~/Views/Profiles/_DocumentSection.cshtml" model="new ProfileDocumentSection(Model, false)"/>
+}
+</div>
+</details>
+</div></div>

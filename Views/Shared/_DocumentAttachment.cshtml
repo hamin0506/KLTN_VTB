@@ -1,0 +1,5 @@
+@model Vtb.Hr.Web.Data.Document
+@inject Vtb.Hr.Web.Services.DocumentFileStore Files
+@if(string.IsNullOrWhiteSpace(Model.FilePath)){<span class="text-secondary">Chưa có tệp</span>}
+else if(Files.Exists(Model.FilePath)){<span class="small text-secondary">Tệp tài liệu #@Model.DocumentId</span><a class="ms-2" asp-controller="DocumentFiles" asp-action="Open" asp-route-id="@Model.DocumentId" target="_blank" rel="noopener"><svg class="menu-icon" aria-hidden="true"><use href="/icons.svg#file"/></svg>Xem file</a>@if(ViewContext.RouteData.Values["action"]?.ToString()=="Details"){<a class="ms-2" asp-controller="DocumentFiles" asp-action="Open" asp-route-id="@Model.DocumentId" asp-route-download="true">Tải xuống</a>}}
+else{<span class="text-secondary">Không tìm thấy tệp đính kèm</span>}

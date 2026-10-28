@@ -1,0 +1,483 @@
+[
+  {
+    "page": "Executive Overview",
+    "id": "030f6470b4270d802485",
+    "type": "cardVisual",
+    "position": {
+      "x": 704.4998168945312,
+      "y": 147.9999542236328,
+      "z": 2000,
+      "height": 116.10486891385767,
+      "width": 277.15355805243445,
+      "tabOrder": 2000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "072a7a10a246b9c85bd0",
+    "type": "cardVisual",
+    "position": {
+      "x": 1346.9998168945312,
+      "y": 147.9999542236328,
+      "z": 4000,
+      "height": 113.33333333333334,
+      "width": 275,
+      "tabOrder": 4000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "332d24f906b2cd8b11c9",
+    "type": "clusteredColumnChart",
+    "position": {
+      "x": 57.9998779296875,
+      "y": 297.99998474121094,
+      "z": 6000,
+      "height": 410,
+      "width": 920,
+      "tabOrder": 6000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "5b3311d69c117b9edb49",
+    "type": "cardVisual",
+    "position": {
+      "x": 1665.9999084472656,
+      "y": 145.99998474121094,
+      "z": 10000,
+      "height": 115,
+      "width": 275,
+      "tabOrder": 10000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "79592be18d8cd50b7d41",
+    "type": "cardVisual",
+    "position": {
+      "x": 1028.666483561198,
+      "y": 146.33328755696616,
+      "z": 3000,
+      "height": 115,
+      "width": 276.6666666666667,
+      "tabOrder": 3000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "9798ed5d109c0b3bc10e",
+    "type": "textbox",
+    "position": {
+      "x": 62.5,
+      "y": 75,
+      "z": 1000,
+      "height": 68,
+      "width": 504,
+      "tabOrder": 1000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "a2e691af25e013a46800",
+    "type": "donutChart",
+    "position": {
+      "x": 57.9998779296875,
+      "y": 743.4999847412109,
+      "z": 8000,
+      "height": 445,
+      "width": 920,
+      "tabOrder": 8000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "a3645477ae9601757715",
+    "type": "cardVisual",
+    "position": {
+      "x": 381.99981689453125,
+      "y": 150.4999542236328,
+      "z": 0,
+      "height": 120,
+      "width": 276.6666666666667,
+      "tabOrder": 0
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "b2062a250b7559cde5b5",
+    "type": "cardVisual",
+    "position": {
+      "x": 61.99981689453125,
+      "y": 150.22217644585504,
+      "z": 5000,
+      "height": 117.92492336555051,
+      "width": 278.7316370458467,
+      "tabOrder": 5000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "b9f1b9d800c5edd5a455",
+    "type": "barChart",
+    "position": {
+      "x": 1027.5,
+      "y": 297.5,
+      "z": 7000,
+      "height": 890,
+      "width": 912.5,
+      "tabOrder": 7000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "cd2ed827e3a007469141",
+    "type": "slicer",
+    "position": {
+      "x": 1347.5,
+      "y": 37.5,
+      "z": 12000,
+      "height": 72.5,
+      "width": 592.5,
+      "tabOrder": 12000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "cd68080dde4e2ac0640e",
+    "type": "tableEx",
+    "position": {
+      "x": 58,
+      "y": 1240,
+      "z": 11000,
+      "height": 737.5,
+      "width": 1882.5,
+      "tabOrder": 11000
+    }
+  },
+  {
+    "page": "Executive Overview",
+    "id": "fd86af47c19622c0902b",
+    "type": "slicer",
+    "position": {
+      "x": 705,
+      "y": 40,
+      "z": 9000,
+      "height": 72.5,
+      "width": 600,
+      "tabOrder": 9000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "066d855b69bdace5aab6",
+    "type": "tableEx",
+    "position": {
+      "x": 62,
+      "y": 1268,
+      "z": 2000,
+      "height": 708,
+      "width": 1882,
+      "tabOrder": 2000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "21dd8563db710ba0a6ab",
+    "type": "slicer",
+    "position": {
+      "x": 1023.3333333333334,
+      "y": 43.333333333333336,
+      "z": 1000,
+      "height": 73.33333333333334,
+      "width": 438.33333333333337,
+      "tabOrder": 1000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "26ef63fc6eb10ce1d93b",
+    "type": "tableEx",
+    "position": {
+      "x": 990,
+      "y": 154,
+      "z": 5000,
+      "height": 262,
+      "width": 950,
+      "tabOrder": 5000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "35ff735cc0b87dd00128",
+    "type": "cardVisual",
+    "position": {
+      "x": 352,
+      "y": 154,
+      "z": 11000,
+      "height": 115,
+      "width": 276.6666666666667,
+      "tabOrder": 11000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "5bf0cc0a9912b5810d66",
+    "type": "slicer",
+    "position": {
+      "x": 1501.6666666666667,
+      "y": 43.333333333333336,
+      "z": 3000,
+      "height": 73.33333333333334,
+      "width": 438.33333333333337,
+      "tabOrder": 3000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "629894d271525ca725c0",
+    "type": "clusteredBarChart",
+    "position": {
+      "x": 62,
+      "y": 312,
+      "z": 6000,
+      "height": 422.5,
+      "width": 857.5,
+      "tabOrder": 6000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "7cf38fba544bdddb5956",
+    "type": "slicer",
+    "position": {
+      "x": 613.3333333333334,
+      "y": 43.333333333333336,
+      "z": 8000,
+      "height": 73.33333333333334,
+      "width": 375,
+      "tabOrder": 8000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "84db5208ed2b4506cc6e",
+    "type": "cardVisual",
+    "position": {
+      "x": 62,
+      "y": 154,
+      "z": 9000,
+      "height": 115,
+      "width": 276.6666666666667,
+      "tabOrder": 9000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "92e6efd7787e4d8ebcce",
+    "type": "textbox",
+    "position": {
+      "x": 62.5,
+      "y": 47.5,
+      "z": 0,
+      "height": 56.66666666666667,
+      "width": 504.1666666666667,
+      "tabOrder": 0
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "b6d9dd60ae14ad55e0c1",
+    "type": "clusteredBarChart",
+    "position": {
+      "x": 62,
+      "y": 772,
+      "z": 7000,
+      "height": 426,
+      "width": 858,
+      "tabOrder": 7000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "ed278dc9181c008dc49b",
+    "type": "cardVisual",
+    "position": {
+      "x": 644,
+      "y": 154,
+      "z": 10000,
+      "height": 115,
+      "width": 276.6666666666667,
+      "tabOrder": 10000
+    }
+  },
+  {
+    "page": "Problem documents",
+    "id": "ee61c5a571bbb991783d",
+    "type": "textbox",
+    "position": {
+      "x": 62.5,
+      "y": 90.83333333333334,
+      "z": 4000,
+      "height": 64.16666666666667,
+      "width": 530,
+      "tabOrder": 4000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "2f553c9a63a36ddba84a",
+    "type": "cardVisual",
+    "position": {
+      "x": 95,
+      "y": 145,
+      "z": 4000,
+      "height": 115,
+      "width": 276.6666666666667,
+      "tabOrder": 4000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "325e875dbe6a78a0163c",
+    "type": "tableEx",
+    "position": {
+      "x": 900,
+      "y": 322,
+      "z": 10000,
+      "height": 844,
+      "width": 996,
+      "tabOrder": 10000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "7fbde19800460030e64c",
+    "type": "textbox",
+    "position": {
+      "x": 62.85714285714286,
+      "y": 92.85714285714286,
+      "z": 2000,
+      "height": 75.71428571428572,
+      "width": 604.2857142857143,
+      "tabOrder": 2000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "83e9bb3119130a83571d",
+    "type": "slicer",
+    "position": {
+      "x": 900,
+      "y": 47.5,
+      "z": 3000,
+      "height": 73.33333333333334,
+      "width": 375,
+      "tabOrder": 3000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "8da888b3dd29a8455b09",
+    "type": "cardVisual",
+    "position": {
+      "x": 1617.9999694824219,
+      "y": 146,
+      "z": 7000,
+      "height": 115,
+      "width": 276.6666666666667,
+      "tabOrder": 7000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "b40f36f796509e089500",
+    "type": "textbox",
+    "position": {
+      "x": 62.5,
+      "y": 47.5,
+      "z": 0,
+      "height": 56.66666666666667,
+      "width": 504.1666666666667,
+      "tabOrder": 0
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "bdcfbf9dc7b0b0960607",
+    "type": "tableEx",
+    "position": {
+      "x": 100,
+      "y": 1194,
+      "z": 11000,
+      "height": 744,
+      "width": 1798,
+      "tabOrder": 11000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "bf3b621c3a79ba411be9",
+    "type": "barChart",
+    "position": {
+      "x": 98,
+      "y": 768,
+      "z": 9000,
+      "height": 397.5,
+      "width": 710,
+      "tabOrder": 9000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "c25dd44a2bd817b451c4",
+    "type": "cardVisual",
+    "position": {
+      "x": 1087.5,
+      "y": 145,
+      "z": 6000,
+      "height": 115,
+      "width": 276.6666666666667,
+      "tabOrder": 6000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "c30d82bdd53aa4bac706",
+    "type": "donutChart",
+    "position": {
+      "x": 98.33333333333334,
+      "y": 380,
+      "z": 8000,
+      "height": 363.33333333333337,
+      "width": 710,
+      "tabOrder": 8000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "cc849737a901b2080a90",
+    "type": "cardVisual",
+    "position": {
+      "x": 525,
+      "y": 145,
+      "z": 5000,
+      "height": 115,
+      "width": 283,
+      "tabOrder": 5000
+    }
+  },
+  {
+    "page": "Contract",
+    "id": "e30a784466808cc2e570",
+    "type": "slicer",
+    "position": {
+      "x": 1455,
+      "y": 47.5,
+      "z": 1000,
+      "height": 73.33333333333334,
+      "width": 438.33333333333337,
+      "tabOrder": 1000
+    }
+  }
+]

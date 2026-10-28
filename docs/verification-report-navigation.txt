@@ -1,0 +1,1 @@
+PASS actual contract drill/back functions: dynamic state, repeated selections, saved table page/search/sort, fixed local return route, invalid state ignored. No live data or browser layout tested.

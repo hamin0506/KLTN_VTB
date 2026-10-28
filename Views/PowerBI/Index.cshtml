@@ -1,0 +1,8 @@
+@{ViewData["Title"]="Báo cáo trực quan";}
+<h1 class="page-title mb-4">Báo cáo trực quan</h1>
+@if(ViewBag.EmbedUrl is string url){
+<div class="card"><iframe title="Báo cáo Power BI" src="@url" class="powerbi-frame" allowfullscreen="true" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<a href="@url" target="_blank" rel="noopener noreferrer" class="btn mt-3">Mở báo cáo trong tab mới</a>
+}else if(ViewBag.Invalid==true){<div class="alert alert-danger">URL báo cáo Power BI không hợp lệ.</div>}
+else{<div class="card"><div class="card-body">Chưa cấu hình báo cáo Power BI.</div></div>}
+

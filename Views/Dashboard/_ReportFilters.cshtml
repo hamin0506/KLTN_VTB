@@ -1,0 +1,11 @@
+﻿@model string
+<div class="card report-filters-card"><div class="card-body"><form id="report-filters"><div class="report-filters-grid">
+@foreach(var item in new[]{("EmployeeIds","Cán bộ"),("DivisionIds","Đơn vị"),("DepartmentIds","Phòng ban")}){
+<div class="report-filter-field"><label class="form-label" for="report-@item.Item1">@item.Item2</label><select id="report-@item.Item1" name="@item.Item1" multiple data-report-filter data-placeholder="Tất cả @item.Item2.ToLower()" hidden></select></div>
+}
+@if(Model=="problem"){
+<div class="report-filter-field"><label class="form-label" for="report-Groups">Nhóm hồ sơ</label><select id="report-Groups" name="Groups" multiple data-report-filter data-placeholder="Tất cả nhóm" hidden><option>Hồ sơ gốc</option><option>Quyết định / Văn bản khác</option></select></div>
+<div class="report-filter-field"><label class="form-label" for="report-TypeIds">Loại hồ sơ</label><select id="report-TypeIds" name="TypeIds" multiple data-report-filter data-placeholder="Tất cả loại hồ sơ" hidden></select></div>
+}
+<div class="report-filter-actions"><button type="button" id="report-reset" class="btn" title="Bộ lọc tự động cập nhật; tìm cán bộ theo mã hoặc họ tên.">Xóa bộ lọc</button></div>
+</div></form></div></div>

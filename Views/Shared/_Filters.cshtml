@@ -1,0 +1,9 @@
+@model GridModel
+@{var labels=new Dictionary<string,string>{{"DivisionId","Đơn vị"},{"DepartmentId","Phòng ban"},{"EmployeeId","Cán bộ"},{"DocumentTypeId","Loại tài liệu"},{"Status","Trạng thái"},{"Group","Nhóm tài liệu"},{"Current","Hiện hành / lịch sử"},{"Term","Thời hạn"}};}
+<form method="get" class="row g-3 align-items-end">
+@if(Model.Kind!=null){<input type="hidden" name="kind" value="@Model.Kind"/>}
+<div class="col-md-4 col-xl-3"><label class="form-label" for="q">Tìm kiếm</label><input class="form-control" id="q" name="q" value="@Model.Filter.Q" placeholder="Nhập mã hoặc tên…" maxlength="200"/></div>
+@foreach(var name in Model.Filters){var value=typeof(Filter).GetProperty(name)?.GetValue(Model.Filter)?.ToString();<div class="col-md-4 col-xl-3"><label class="form-label" for="filter-@name">@labels.GetValueOrDefault(name,name)</label><select class="form-select" id="filter-@name" name="@name"><option value="">Tất cả</option>@foreach(var option in Model.Options.GetValueOrDefault(name,[])){<option value="@option.Value" selected="@(option.Value==value)">@option.Text</option>}</select></div>}
+@if(ViewContext.RouteData.Values["controller"]?.ToString() is "Home" or "Quality") {<div class="col-md-4"><label class="form-check"><input class="form-check-input" name="KpiOnly" type="checkbox" value="true" checked="@Model.Filter.KpiOnly"/><span class="form-check-label">Chỉ phạm vi KPI theo View</span></label></div>}
+<div class="col-auto"><button class="btn btn-primary" type="submit">Áp dụng</button> <a class="btn" asp-action="@ViewContext.RouteData.Values["action"]" asp-route-kind="@Model.Kind">Xóa bộ lọc</a></div>
+</form>

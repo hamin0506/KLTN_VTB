@@ -1,0 +1,24 @@
+DECLARE @f_DivisionIds1 int = 1;
+DECLARE @term_contains nvarchar(4000) = N'%'' OR 1=1 --%';
+DECLARE @p int = 20;
+
+SELECT [v0].[Department], [v0].[Id], [v0].[Name], [v0].[Document], [v0].[Group], [v0].[IssueDate], [v0].[ExpiryDate], [v0].[Days], [v0].[Reason], [v0].[Status]
+FROM (
+    SELECT DISTINCT NULL AS [Department], [v].[employee_id] AS [Id], [v].[full_name] AS [Name], [v].[document_name] AS [Document], [v].[document_group] AS [Group], [v].[issue_date] AS [IssueDate], [v].[expiry_date] AS [ExpiryDate], [v].[expiry_days] AS [Days], [v].[invalid_reason] AS [Reason], CASE
+        WHEN [v].[quality_status] = N'HOP_LE' THEN N'Hợp lệ'
+        WHEN [v].[quality_status] = N'SAP_HET_HAN' THEN N'Sắp hết hạn'
+        WHEN [v].[quality_status] = N'DA_HET_HAN' THEN N'Đã hết hạn'
+        WHEN [v].[quality_status] = N'KHONG_HOP_LE' THEN N'Không hợp lệ'
+    END AS [Status]
+    FROM [dbo].[vw_document_quality] AS [v]
+    WHERE [v].[employee_id] IN (
+        SELECT [e].[employee_id]
+        FROM [dbo].[employee] AS [e]
+        WHERE EXISTS (
+            SELECT 1
+            FROM [dbo].[department] AS [d]
+            WHERE [d].[department_id] = [e].[department_id] AND [d].[division_id] = @f_DivisionIds1)
+    ) AND [v].[document_code] NOT IN (N'HDXDTH1', N'HDXDTH2', N'HDTHUVIEC') AND [v].[quality_status] <> N'HOP_LE' AND ([v].[employee_id] LIKE @term_contains ESCAPE N'\' OR [v].[full_name] LIKE @term_contains ESCAPE N'\' OR [v].[document_name] LIKE @term_contains ESCAPE N'\')
+) AS [v0]
+ORDER BY [v0].[Id], [v0].[Name], [v0].[Document], [v0].[Group], [v0].[IssueDate], [v0].[ExpiryDate], [v0].[Days], [v0].[Status], [v0].[Reason]
+OFFSET @p ROWS FETCH NEXT @p ROWS ONLY

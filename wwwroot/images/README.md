@@ -1,0 +1,1 @@
+Đặt file logo VietinBank chính thức tại vietinbank-logo.png trong thư mục này. Không có logo giả được tạo. Layout tự hiện ảnh khi file tồn tại, giữ đúng tỷ lệ trên nền trắng để đọc được trong sidebar tối. Khi chưa có file, chỉ hiện tên ứng dụng.

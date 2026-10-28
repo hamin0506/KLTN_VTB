@@ -1,0 +1,84 @@
+.report-tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}.report-tab{white-space:nowrap;border:1px solid #dfe7ee;background:white;border-radius:8px;padding:10px 14px;font:inherit}.report-tab.active{background:#163d60;color:white;border-color:#163d60}.report-tab:disabled{color:#68788a;background:#f0f3f6}.overview-chart{height:390px;min-width:0;width:100%}.wide-chart{height:440px}.table-sort-button{background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer}.overview-table th[aria-sort="descending"] button:after{content:' ↓'}.overview-table th[aria-sort="ascending"] button:after{content:' ↑'}.overview-table td{max-width:320px;white-space:normal}.overview-table{min-width:1050px}#overview-results[aria-busy="true"]{opacity:.5;pointer-events:none}#missing-search{max-width:460px}#page-size{width:85px}@media(max-width:575px){.overview-chart{height:340px}.wide-chart{height:420px}.report-tab{padding:8px 10px}#missing-search{width:100%;max-width:none}}
+/* Scoped overview controls: no changes to CRUD or other dashboards. */
+#executive-overview .overview-multi{position:relative;min-width:0}
+#executive-overview .overview-multi-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;min-height:40px;padding:9px 12px;border:1px solid #cbd5e1;border-radius:6px;background:var(--tblr-bg-forms,#fff);color:var(--tblr-body-color,#182433);cursor:pointer;font-size:14px}
+#executive-overview .overview-multi-toggle::-webkit-details-marker{display:none}
+#executive-overview .overview-multi-toggle:after{content:'';width:8px;height:8px;border-right:2px solid #52667b;border-bottom:2px solid #52667b;transform:rotate(45deg);margin:-4px 3px 0 8px;flex-shrink:0}
+#executive-overview .overview-multi[open] .overview-multi-toggle:after{transform:rotate(225deg);margin-top:4px}
+#executive-overview .overview-multi-toggle:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+#executive-overview .overview-multi-panel{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:100;max-height:280px;overflow-y:auto;padding:8px;border:1px solid #dbe3ed;border-radius:8px;background:var(--tblr-bg-forms,#fff);box-shadow:0 8px 24px #18243326}
+#executive-overview .overview-multi-option{display:flex;gap:10px;align-items:flex-start;padding:9px 7px;margin:0;border-radius:5px;cursor:pointer;overflow-wrap:anywhere;color:var(--tblr-body-color,#182433)}
+#executive-overview .overview-multi-option:hover{background:#2563eb0d}
+#executive-overview .overview-multi-option .form-check-input{flex-shrink:0;margin:2px 0 0}
+@media(max-width:767px){#executive-overview .overview-multi-panel{max-height:220px}}
+#executive-overview select[data-multi-filter][hidden]{display:none!important}
+#document-drill .document-state-KHONG_HOP_LE{color:#7C3AED!important;background:#7c3aed12!important}
+#document-drill .document-state-DA_HET_HAN{color:#DC2626!important;background:#dc262612!important}
+#document-drill .document-state-HOP_LE{color:#059669!important;background:#05966912!important}
+#document-drill .document-state-SAP_HET_HAN{color:#F59E0B!important;background:#182433!important}
+
+/* KPI component: values are plain text, separate from badges and status styles. */
+.dashboard-kpi-grid{display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:1fr;gap:16px;margin-bottom:16px}
+.dashboard-kpi-card{display:flex;flex-direction:column;min-width:0;min-height:120px;padding:16px;background:#fff;border:1px solid #e2e8f0;border-top:3px solid #dbe5ef;border-radius:12px;box-shadow:0 2px 6px #18243308}
+.dashboard-kpi-label{margin:0;font-size:14px;line-height:1.5;font-weight:500;color:#52667b;min-height:42px;overflow-wrap:anywhere}
+.dashboard-kpi-value{margin-top:auto;padding-top:6px;text-align:left;font-size:34px;line-height:1.2;font-weight:700;font-variant-numeric:tabular-nums;min-width:0;overflow-wrap:anywhere}
+.dashboard-kpi-value--total{color:#2563EB}
+.dashboard-kpi-value--complete{color:#059669}
+.dashboard-kpi-value--missing{color:#EA580C}
+.dashboard-kpi-value--expiring{color:#D97706}
+.dashboard-kpi-value--expired{color:#DC2626}
+.dashboard-kpi-value--invalid{color:#7C3AED}
+@media(min-width:480px){.dashboard-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:768px){.dashboard-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1440px){.dashboard-kpi-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+#executive-overview #employee-back[hidden]{display:none!important}
+.employee-chart-scroll{overflow-x:auto;min-width:0;max-width:100%}.employee-chart-scroll:focus-visible{outline:2px solid #2563EB;outline-offset:-2px}
+
+/* V3: chart-specific dimensions; only report surfaces are affected. */
+:is(#executive-overview,.secondary-report) .card{min-width:0;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 2px 6px #18243308;background:#fff}
+:is(#executive-overview,.secondary-report) .card-header{padding:16px;min-height:0}
+:is(#executive-overview,.secondary-report) .card-body{padding:16px}
+:is(#executive-overview,.secondary-report) .card-title{font-size:16px;line-height:1.4;margin:0}
+.dashboard-overview-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-bottom:16px;align-items:start}
+.dashboard-overview-left{display:grid;gap:16px;min-width:0}
+#executive-overview #employee-chart{height:340px}
+#executive-overview #distribution-chart,.secondary-report[data-report="contract"] #report-chart-second{height:300px}
+#executive-overview #employee-division{max-width:360px}
+.dashboard-chart-viewport{max-height:430px;overflow:auto;min-width:0;border-radius:0 0 12px 12px}
+.dashboard-chart-viewport:focus-visible{outline:2px solid #2563eb;outline-offset:-2px}
+.dashboard-documents .dashboard-chart-viewport{max-height:760px}
+:is(#executive-overview,.secondary-report) .table-responsive{max-height:460px;overflow:auto}
+:is(#executive-overview,.secondary-report) .overview-table thead{position:sticky;top:0;z-index:2;background:#f8fafc}
+:is(#executive-overview,.secondary-report) .overview-table th{background:#f8fafc}
+@media(min-width:1200px){.dashboard-overview-layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:767px){.dashboard-documents .dashboard-chart-viewport{max-height:430px}.dashboard-kpi-value{font-size:32px}.secondary-report .report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:479px){.secondary-report .report-kpis{grid-template-columns:minmax(0,1fr)}}
+
+/* Reference layout: overview only. Preserve words and leave room between labels. */
+#executive-overview .dashboard-kpi-label,#executive-overview .card-title,
+#executive-overview .overview-multi-option,#executive-overview .overview-multi-toggle,
+#executive-overview .overview-table :is(th,td){word-break:normal;overflow-wrap:normal;hyphens:none;line-height:1.5}
+#executive-overview .dashboard-kpi-card{padding:12px;min-height:108px}
+#executive-overview .dashboard-kpi-label{font-size:13px;min-height:39px}
+#executive-overview .dashboard-kpi-value{font-size:30px}
+#executive-overview .dashboard-overview-layout{gap:24px}
+#executive-overview .dashboard-overview-left{gap:20px}
+#executive-overview .overview-employee-controls{font-size:12px;padding-bottom:4px}
+#executive-overview .overview-employee-controls .btn{font-size:12px;padding:5px 8px}
+#executive-overview #employee-division{font-size:12px;padding-top:5px;padding-bottom:5px;max-width:290px}
+#executive-overview #employee-breadcrumb{line-height:1.5}
+#executive-overview .overview-table td{padding:10px 12px}
+#executive-overview .overview-table th{padding:12px;white-space:normal}
+@media(min-width:1200px){
+ #executive-overview .dashboard-kpi-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}
+ #executive-overview .dashboard-overview-layout{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr)}
+}
+@media(max-width:575px){#executive-overview .dashboard-overview-layout{gap:16px}}
+
+/* V4: match the right plot viewport to the complete left stack on desktop. */
+#executive-overview #employee-division[hidden]{display:none!important}
+@media(min-width:1200px){
+ #executive-overview .dashboard-documents{height:var(--overview-stack-height,auto);min-height:0;display:flex;flex-direction:column}
+ #executive-overview .dashboard-documents>.card-header{flex:0 0 auto}
+ #executive-overview .dashboard-documents>.dashboard-chart-viewport{flex:1 1 0;min-height:0;max-height:none}
+}

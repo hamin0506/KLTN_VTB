@@ -1,0 +1,18 @@
+@model ProfileModel
+@using Vtb.Hr.Web.Services
+@using Vtb.Hr.Web.Security
+@inject IConfiguration Config
+@{var warnings=ProfilePresentation.ProfileWarnings(Model).ToList();var admin=Access.Admin(User,Config);}
+<div class="card mb-4"><div class="card-header"><h2 class="card-title">Cảnh báo chất lượng tài liệu</h2></div><div class="card-body profile-warning-list">
+@if(warnings.Count==0){<p class="text-secondary mb-0">Không có tài liệu cần cảnh báo.</p>}
+@foreach(var item in warnings){
+<article class="profile-warning">
+<div class="profile-warning-heading"><h3>@item.DocumentName</h3><span class="profile-status profile-status--@ProfilePresentation.StateClass(item.QualityStatus)">@ProfilePresentation.StateLabel(item.QualityStatus)</span></div>
+<dl class="profile-warning-meta">
+@if(item.ExpiryDate.HasValue){<div><dt>Ngày hết hạn:</dt><dd>@QualityService.Date(item.ExpiryDate)</dd></div>}
+@if(item.ExpiryDays.HasValue){<div><dt>@(item.ExpiryDays.Value<0?"Đã quá hạn:":"Thời hạn còn lại:")</dt><dd>@Math.Abs((long)item.ExpiryDays.Value) ngày</dd></div>}
+@if(!string.IsNullOrWhiteSpace(item.InvalidReason)){<div><dt>Nguyên nhân:</dt><dd>@item.InvalidReason</dd></div>}
+</dl>
+@if(admin){<a class="btn btn-sm btn-outline-primary" asp-controller="Catalog" asp-action="Edit" asp-route-kind="documents" asp-route-id="@item.DocumentId">Sửa tài liệu</a>}
+</article>}
+</div></div>

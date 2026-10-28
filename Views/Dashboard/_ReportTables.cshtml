@@ -1,0 +1,10 @@
+@model string
+@{var all=new[]{("expiring","Hồ sơ sắp hết hạn"),("problem","Phân tích tài liệu có vấn đề"),("contractIssues","Nhân viên cần xử lý hợp đồng"),("expiredContracts","Hợp đồng đã hết hạn"),("contractDetail","Chi tiết hợp đồng theo trạng thái")};var keys=Model switch{"problem"=>new[]{"expiring","problem"},"contract"=>new[]{"contractIssues","expiredContracts"},"detail"=>new[]{"contractDetail"},"problemTable"=>new[]{"problem"},_=>new[]{Model}};var tables=all.Where(x=>keys.Contains(x.Item1));}
+@foreach(var table in tables){
+<div class="card mb-4 report-table" data-kind="@table.Item1">
+<div class="card-header flex-wrap gap-3"><h2 class="card-title">@table.Item2</h2><form class="report-search ms-auto d-flex gap-2"><input class="form-control" maxlength="100" placeholder="Tìm mã, họ tên, tên hồ sơ" aria-label="Tìm trong @table.Item2"/><button class="btn" type="submit">Tìm</button></form></div>
+<div class="alert alert-danger m-3 table-error" role="alert" hidden></div>
+<div class="table-responsive"><table class="table table-vcenter overview-table"><thead></thead><tbody></tbody></table></div>
+<div class="card-footer d-flex justify-content-between flex-wrap gap-2"><span class="table-page" aria-live="polite"></span><div class="d-flex gap-2"><select class="form-select table-size" aria-label="Số dòng mỗi trang"><option>20</option><option>50</option><option>100</option></select><button type="button" class="btn table-prev" disabled>Trước</button><button type="button" class="btn table-next" disabled>Sau</button></div></div>
+</div>
+}

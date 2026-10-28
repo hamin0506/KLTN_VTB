@@ -1,0 +1,55 @@
+﻿@model ProfileModel
+@using Vtb.Hr.Web.Services
+@{
+ Layout=null; var e=Model.Employee;
+ var printedAt=TimeZoneInfo.ConvertTimeBySystemTimeZoneId(DateTimeOffset.UtcNow,"SE Asia Standard Time");
+ var sections=new[]{("Hồ sơ gốc", "I. HỒ SƠ GỐC CỦA CÁN BỘ"), ("Hợp đồng lao động", "A. HỢP ĐỒNG LAO ĐỘNG"), ("Quyết định / Văn bản khác", "B. QUYẾT ĐỊNH, VĂN BẢN KHÁC")};
+ var documents=Model.Documents.ToLookup(x=>x.DocumentTypeId);
+ var storageColumns=new[]{"Bản gốc","Bản chính","Bản công chứng","Bản photo"};
+ string Result(object? value)=>value==null?"--":ProfilePresentation.Text(value.ToString());
+}
+<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Lý lịch trích ngang · @e.EmployeeId</title><link rel="stylesheet" href="~/css/profile-print.css" asp-append-version="true"/></head><body>
+<nav class="print-controls"><label for="print-scope">Nội dung in</label><select id="print-scope"><option value="all">In toàn bộ</option><option value="biography">In lý lịch trích ngang</option><option value="catalog">In danh mục hồ sơ</option></select><button type="button" id="print-profile">In / Lưu PDF</button><a asp-action="Details" asp-route-id="@e.EmployeeId">Quay lại hồ sơ</a></nav>
+<main><article class="print-page biography">
+<header><partial name="~/Views/Profiles/_PrintBrand.cshtml"/><h1>LÝ LỊCH TRÍCH NGANG CÁN BỘ</h1></header>
+<h2>I. THÔNG TIN CÁ NHÂN</h2><dl><dt>Mã cán bộ</dt><dd>@e.EmployeeId</dd><dt>Họ và tên</dt><dd>@e.FullName</dd><dt>Ngày sinh</dt><dd>@QualityService.Date(e.DateOfBirth)</dd><dt>Giới tính</dt><dd>@Labels.Text(e.Gender)</dd><dt>Số điện thoại</dt><dd>@ProfilePresentation.Text(e.PhoneNumber)</dd><dt>Email</dt><dd>@ProfilePresentation.Text(e.Email)</dd><dt>Quê quán</dt><dd>@ProfilePresentation.Text(e.Hometown)</dd></dl>
+<h2>II. THÔNG TIN CÔNG TÁC</h2><dl><dt>Đơn vị</dt><dd>@Model.Department.Division.DivisionName</dd><dt>Phòng ban</dt><dd>@Model.Department.DepartmentName</dd><dt>Chức danh/chức vụ</dt><dd>@ProfilePresentation.Text(e.PositionName)</dd><dt>Ngày vào làm việc</dt><dd>@QualityService.Date(e.JoinDate)</dd><dt>Trạng thái làm việc</dt><dd>@Labels.Text(e.EmploymentStatus)</dd><dt>Ngày nghỉ việc</dt><dd>@QualityService.Date(e.LeaveDate)</dd></dl>
+<h2>III. TRÌNH ĐỘ CHUYÊN MÔN</h2>
+@if(Model.Qualifications.Count==0){<p>Chưa có thông tin văn bằng.</p>}else{<table><thead><tr><th>Trình độ</th><th>Tên văn bằng</th><th>Chuyên ngành</th><th>Cơ sở đào tạo</th><th>Ngày tốt nghiệp</th></tr></thead><tbody>@foreach(var degree in Model.Qualifications){<tr><td>@degree.QualificationLevel</td><td>@ProfilePresentation.Text(degree.DegreeName)</td><td>@ProfilePresentation.Text(degree.Major)</td><td>@ProfilePresentation.Text(degree.Institution)</td><td>@QualityService.Date(degree.GraduationDate)</td></tr>}</tbody></table>}
+<h2>IV. TÌNH TRẠNG HỒ SƠ</h2>
+<table class="indicators"><colgroup><col style="width:58%"/><col/></colgroup><thead><tr><th>Chỉ tiêu</th><th>Kết quả</th></tr></thead><tbody>
+<tr><td>Tổng số loại tài liệu yêu cầu</td><td>@Result(Model.Quality?.TotalRequiredDocuments)</td></tr>
+<tr><td>Số hồ sơ đã có</td><td>@Result(Model.Quality?.TotalDocumentsPresent)</td></tr>
+<tr><td>Số hồ sơ còn thiếu</td><td>@Result(Model.Quality?.TotalDocumentsMissing)</td></tr>
+<tr><td>Số tài liệu hợp lệ</td><td>@ProfilePresentation.CurrentCount(Model,"HOP_LE")</td></tr>
+<tr><td>Số tài liệu sắp hết hạn</td><td>@ProfilePresentation.CurrentCount(Model,"SAP_HET_HAN")</td></tr>
+<tr><td>Số tài liệu đã hết hạn</td><td>@ProfilePresentation.CurrentCount(Model,"DA_HET_HAN")</td></tr>
+<tr><td>Số tài liệu không hợp lệ</td><td>@ProfilePresentation.CurrentCount(Model,"KHONG_HOP_LE")</td></tr>
+<tr><td>Tình trạng hồ sơ hiện tại</td><td>@(string.IsNullOrWhiteSpace(Model.Quality?.EmployeeQualityStatus)?"--":Labels.Text(Model.Quality.EmployeeQualityStatus))</td></tr>
+<tr><td>Cảnh báo hiện tại</td><td>@Result(Model.Quality?.QualityIssue)</td></tr>
+</tbody></table>
+<footer class="confirmation"><p class="confirmation-date">Hà Nội, ngày @printedAt.Day tháng @printedAt.Month năm @printedAt.Year</p><div class="signatures"><div><strong>NGƯỜI LẬP</strong><p>(Ký, ghi rõ họ tên)</p></div><div><strong>CÁN BỘ XÁC NHẬN</strong><p>(Ký, ghi rõ họ tên)</p></div></div></footer>
+</article>
+<article class="print-page document-catalog">
+<header><partial name="~/Views/Profiles/_PrintBrand.cshtml"/><h1>DANH MỤC HỒ SƠ CÁN BỘ</h1><p>Họ và tên: @e.FullName — Mã cán bộ: @e.EmployeeId</p><p>Đơn vị: @Model.Department.Division.DivisionName — Phòng ban: @Model.Department.DepartmentName</p><p>Chức danh: @ProfilePresentation.Text(e.PositionName)</p></header>
+@foreach(var category in sections){
+ var original=category.Item1=="Hồ sơ gốc";
+ var types=Model.DocumentTypes.Values.Where(t=>t.DocumentGroup==category.Item1 || (category.Item1=="Quyết định / Văn bản khác" && t.DocumentGroup=="Quyết định")).OrderBy(t=>Model.OrderedDocumentTypeIds.IndexOf(t.DocumentTypeId)).ToList();
+ if(category.Item1=="Hợp đồng lao động"){<h2>II. HỒ SƠ QUÁ TRÌNH LÀM VIỆC CỦA CÁN BỘ TẠI VIETINBANK</h2>}
+ if(original){<h2>@category.Item2</h2>}else{<h3>@category.Item2</h3>}
+ <table class="catalog-table">
+ @if(original){<colgroup><col style="width:6%"/><col style="width:38%"/><col style="width:12%"/><col style="width:12%"/><col style="width:12%"/><col style="width:12%"/><col style="width:8%"/></colgroup><thead><tr><th>STT</th><th>Tên hồ sơ</th>@foreach(var storage in storageColumns){<th>@storage</th>}<th>Số lượng</th></tr></thead>}
+ else{<colgroup><col style="width:8%"/><col style="width:80%"/><col style="width:12%"/></colgroup><thead><tr><th>STT</th><th class="document-name-heading">Loại hồ sơ</th><th>Số lượng</th></tr></thead>}
+ <tbody>
+ @for(var i=0;i<types.Count;i++){
+ var type=types[i];var rows=documents[type.DocumentTypeId].ToList();
+ <tr><td class="center">@(i+1)</td><td>@type.DocumentName</td>
+ @if(original){@foreach(var storage in storageColumns){<td class="center storage-mark">@(rows.Any(d=>string.Equals(d.StorageForm?.Trim(),storage,StringComparison.OrdinalIgnoreCase))?"✓":"")</td>}<td class="center">@rows.Count</td>}
+ else{<td class="center">@rows.Count</td>}
+ </tr>}
+ @if(types.Count==0){<tr><td colspan="@(original?7:3)">Chưa có loại hồ sơ trong danh mục.</td></tr>}
+ </tbody></table>
+}
+
+<footer class="confirmation"><p class="confirmation-date">Hà Nội, ngày @printedAt.Day tháng @printedAt.Month năm @printedAt.Year</p><div class="signatures"><div><strong>NGƯỜI LẬP BIỂU</strong><p>(Ký, ghi rõ họ tên)</p></div><div><strong>NGƯỜI KIỂM TRA</strong><p>(Ký, ghi rõ họ tên)</p></div></div></footer>
+</article></main><script src="~/js/profile-print.js" asp-append-version="true"></script></body></html>

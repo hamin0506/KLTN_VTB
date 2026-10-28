@@ -1,0 +1,1 @@
+PASS dropdown semantic control, multi-selection, original select binding, summary, reset, option replacement and Escape focus. Browser layout and live KPI values not tested.

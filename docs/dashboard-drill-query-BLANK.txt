@@ -1,0 +1,22 @@
+DECLARE @f_Statuses1 varchar(30) = 'DangLamViec';
+DECLARE @f_DivisionIds1 int = 1;
+DECLARE @term_contains nvarchar(4000) = N'%'' OR 1=1 --%';
+DECLARE @p int = 20;
+
+SELECT [s].[EmployeeId], [s].[FullName], [s].[Department], [s].[Code], [s].[Document], [s].[IssueDate], [s].[ExpiryDate], [s].[Days], [s].[RequiredStorage], [s].[Storage], [s].[Reason]
+FROM (
+    SELECT DISTINCT [v].[employee_id] AS [EmployeeId], [v].[full_name] AS [FullName], [d0].[department_name] AS [Department], [v].[document_code] AS [Code], [v].[document_name] AS [Document], [v].[issue_date] AS [IssueDate], [v].[expiry_date] AS [ExpiryDate], [v].[expiry_days] AS [Days], [v].[required_storage_form] AS [RequiredStorage], [v].[storage_form] AS [Storage], [v].[invalid_reason] AS [Reason]
+    FROM [dbo].[vw_document_quality] AS [v]
+    INNER JOIN (
+        SELECT [e].[employee_id], [e].[department_id]
+        FROM [dbo].[employee] AS [e]
+        WHERE [e].[employment_status] = @f_Statuses1 AND EXISTS (
+            SELECT 1
+            FROM [dbo].[department] AS [d]
+            WHERE [d].[department_id] = [e].[department_id] AND [d].[division_id] = @f_DivisionIds1)
+    ) AS [e0] ON [v].[employee_id] = [e0].[employee_id]
+    INNER JOIN [dbo].[department] AS [d0] ON [e0].[department_id] = [d0].[department_id]
+    WHERE [v].[quality_status] NOT IN (N'HOP_LE', N'SAP_HET_HAN', N'DA_HET_HAN', N'KHONG_HOP_LE') AND ([v].[employee_id] LIKE @term_contains ESCAPE N'\' OR [v].[full_name] LIKE @term_contains ESCAPE N'\' OR [v].[document_code] LIKE @term_contains ESCAPE N'\' OR [v].[document_name] LIKE @term_contains ESCAPE N'\')
+) AS [s]
+ORDER BY [s].[EmployeeId]
+OFFSET @p ROWS FETCH NEXT @p ROWS ONLY

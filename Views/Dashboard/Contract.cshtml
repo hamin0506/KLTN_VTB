@@ -1,0 +1,28 @@
+﻿@{ViewData["Title"]="Hợp đồng lao động";}
+<link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true"/><link rel="stylesheet" href="~/css/reports.css" asp-append-version="true"/>
+<section class="secondary-report" id="secondary-report" data-report="contract" data-api="@Url.Action("ContractData")" data-options="@Url.Action("ReportOptions")" data-table="@Url.Action("ReportTable")" data-drill="@Url.Action("ContractDetails")">
+<h1 class="page-title mb-2">Theo dõi Hợp đồng lao động</h1><p class="text-secondary">Bao gồm toàn bộ tài liệu liên quan đến HĐLĐ của nhân viên Đang làm việc và Tạm hoãn HĐLĐ.</p><partial name="_ReportTabs"/><partial name="_ReportFilters" model='@("contract")'/>
+<div id="report-error" class="alert alert-danger" hidden role="alert"></div><div id="report-status" class="text-secondary mb-3" role="status"></div>
+<div class="dashboard-kpi-grid report-kpis">
+@foreach(var k in new[]{("valid","Nhân viên có HĐLĐ hợp lệ","complete"),("next","Nhân viên có HĐ cần ký tiếp","missing"),("missing","Nhân viên thiếu HĐXĐTH1","missing"),("expiring","Hợp đồng sắp hết hạn","expiring")}){<div class="dashboard-kpi-card"><div class="dashboard-kpi-label">@k.Item2</div><div class="dashboard-kpi-value dashboard-kpi-value--@k.Item3" data-report-kpi="@k.Item1">—</div></div>}
+</div>
+<div class="report-charts-grid">
+<div class="card report-chart-card"><div class="card-header"><h2 class="card-title">Tổng nhân viên theo trạng thái hợp đồng</h2></div><div class="dashboard-chart-viewport" tabindex="0" role="region" aria-label="Tổng nhân viên theo trạng thái hợp đồng"><div id="report-chart-second" class="overview-chart" role="img" aria-label="Tổng nhân viên theo trạng thái hợp đồng"></div></div><details class="contract-drill-actions"><summary>Xem chi tiết theo trạng thái</summary><div id="contract-links" class="card-body d-flex flex-wrap gap-2"></div></details></div>
+<div class="card report-chart-card"><div class="card-header"><h2 class="card-title">Nhân viên cần xử lý hợp đồng theo đơn vị/phòng ban</h2></div><div class="dashboard-chart-viewport" tabindex="0" role="region" aria-label="Nhân viên cần xử lý hợp đồng theo đơn vị/phòng ban"><div class="contract-org-controls">
+<div class="contract-org-modes" role="group" aria-label="Chế độ nhân viên cần xử lý">
+<button id="contract-mode-division" type="button" class="btn btn-sm active" aria-pressed="true">Theo đơn vị</button>
+<button id="contract-mode-all" type="button" class="btn btn-sm" aria-pressed="false">Tất cả phòng ban</button>
+<button id="contract-mode-detail" type="button" class="btn btn-sm" aria-pressed="false">Chi tiết đơn vị</button></div>
+<label id="contract-division-label" hidden>Đơn vị <select id="contract-division" class="form-select form-select-sm" aria-label="Chọn đơn vị"></select></label>
+<span id="contract-org-path" role="status">Theo đơn vị · Nhấn thanh để xem phòng ban</span><button id="contract-org-back" class="btn btn-sm" type="button" hidden>Quay lại theo đơn vị</button></div><div id="report-chart-first" class="overview-chart" role="img" aria-label="Nhân viên cần xử lý hợp đồng theo đơn vị/phòng ban"></div></div></div>
+</div>
+<section class="card contract-table-tabs" aria-labelledby="contract-tables-title">
+<div class="card-header"><h2 class="card-title" id="contract-tables-title">Danh sách hợp đồng cần theo dõi</h2></div>
+<div class="nav nav-tabs px-3" role="tablist" aria-label="Danh sách hợp đồng">
+<button type="button" class="nav-link active" id="contractIssues-tab" role="tab" aria-selected="true" aria-controls="contractIssues-panel">Nhân viên cần xử lý</button>
+<button type="button" class="nav-link" id="expiredContracts-tab" role="tab" aria-selected="false" aria-controls="expiredContracts-panel" tabindex="-1">Hợp đồng đã hết hạn</button></div>
+<div id="contractIssues-panel" role="tabpanel" aria-labelledby="contractIssues-tab"><partial name="_ReportTables" model='@("contractIssues")'/></div>
+<div id="expiredContracts-panel" role="tabpanel" aria-labelledby="expiredContracts-tab" hidden><partial name="_ReportTables" model='@("expiredContracts")'/></div></section>
+
+</section>
+@section Scripts{<script src="~/lib/echarts/echarts.min.js" asp-append-version="true"></script><script src="~/js/contract-report.js" asp-append-version="true"></script><script src="~/js/reports.js" asp-append-version="true"></script>}

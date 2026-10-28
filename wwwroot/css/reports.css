@@ -1,0 +1,113 @@
+.secondary-report .report-kpis{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.report-filter{position:relative}.report-filter summary{display:flex;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;border:1px solid #cbd5e1;border-radius:6px;background:#fff;padding:10px 12px}.report-filter summary:after{content:'⌄';font-weight:bold}.report-filter summary::-webkit-details-marker{display:none}.report-filter summary:focus-visible{outline:2px solid #2563eb}
+.report-filter-panel{position:absolute;z-index:100;background:#fff;left:0;right:0;border:1px solid #dbe3ed;box-shadow:0 8px 20px #18243320;border-radius:8px;padding:10px;max-height:330px;overflow:auto}.report-filter-option{display:flex;gap:10px;padding:8px 2px;align-items:flex-start;overflow-wrap:normal;word-break:normal;line-height:1.5}.report-filter-option input{margin-top:3px;flex-shrink:0}.report-table .table-size{width:80px}.secondary-report [hidden]{display:none!important}.secondary-report .overview-table{min-width:850px}.report-status-badge{font-size:12px;font-weight:600;padding:4px 7px;border-radius:5px;white-space:normal;display:inline-block;background:#f1f5f9;color:#475569}.report-table th button{white-space:normal}.secondary-report[aria-busy=true]{opacity:.65}
+
+/* Keep report KPI columns usable after the shared mobile rules. */
+@media(max-width:767px){.secondary-report .report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:479px){.secondary-report .report-kpis{grid-template-columns:minmax(0,1fr)}}
+
+/* Whole-word typography on Problem documents and Contract only. */
+.secondary-report:is([data-report="problem"],[data-report="contract"]) :is(.dashboard-kpi-label,.card-title,.report-filter summary,.report-filter-option,.report-status-badge,.report-table th,.report-table td,#contract-links .btn){
+ word-break:normal;overflow-wrap:normal;hyphens:none;line-height:1.5;
+}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-table th{padding:12px;vertical-align:middle}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-table td{padding:10px 12px}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-table th button{line-height:1.5;text-align:left}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-filter summary{align-items:center;min-width:0}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-filter summary:after{flex-shrink:0}
+.secondary-report #contract-links{gap:10px!important}
+.secondary-report #contract-links .btn{white-space:normal;padding:7px 10px;text-align:left}
+
+/* Compact report layout: scoped away from Overview and drill-through pages. */
+.secondary-report:is([data-report="problem"],[data-report="contract"]){min-width:0;container-type:inline-size}
+.secondary-report .report-filters-card{margin:12px 0}
+.secondary-report .report-filters-card .card-body{padding:12px}
+.report-filters-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end}
+.report-filter-field{min-width:0}
+.report-filter-field .form-label{margin-bottom:4px}
+.report-filter-actions .btn{white-space:nowrap;width:100%}
+.secondary-report .report-filter summary{padding:7px 10px;min-height:38px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.secondary-report .report-filter summary:after{margin-left:auto}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .dashboard-kpi-card{min-height:100px;padding:12px}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-kpis{gap:12px;margin-bottom:12px}
+.secondary-report #report-status{font-size:12px;margin-bottom:8px!important}
+.report-charts-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start;margin-bottom:12px}
+.secondary-report[data-report="contract"] .report-charts-grid{grid-template-columns:minmax(0,2fr) minmax(0,3fr)}
+.report-chart-card{min-width:0;overflow:hidden}
+.report-chart-card .card-header{padding:12px;min-height:0}
+.report-chart-card .card-title{font-size:15px;margin:0}
+.report-chart-card .dashboard-chart-viewport{max-height:320px}
+.report-chart-card .overview-chart{height:280px}
+.secondary-report #contract-links{padding:8px 12px;gap:6px!important}
+.secondary-report #contract-links:empty{display:none}
+.secondary-report #contract-links .btn{padding:4px 8px;font-size:12px}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-table{min-width:0;margin-bottom:12px!important}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-table .card-header{padding:12px;min-height:0}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-table .table-responsive{max-height:420px;overflow:auto}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-table thead{position:sticky;top:0;z-index:1;background:var(--tblr-bg-surface,#fff)}
+.secondary-report:is([data-report="problem"],[data-report="contract"]) .report-table .card-footer{padding:10px 12px}
+@container (min-width:950px){
+ .report-filters-grid{grid-template-columns:repeat(5,minmax(0,1fr)) auto}
+ .secondary-report[data-report="contract"] .report-filters-grid{grid-template-columns:repeat(3,minmax(0,1fr)) auto}
+ .secondary-report .report-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .secondary-report[data-report="contract"] .report-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@container (max-width:799px){
+ .report-charts-grid,.secondary-report[data-report="contract"] .report-charts-grid{grid-template-columns:minmax(0,1fr)}
+ .report-filters-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@container (max-width:479px){
+ .report-filters-grid{grid-template-columns:minmax(0,1fr)}
+ .secondary-report .report-search{width:100%;min-width:0}
+ .secondary-report .report-search input{min-width:0}
+}
+/* Problem documents: all categories visible, no nested chart scrolling. */
+.secondary-report[data-report="problem"] .report-chart-card{overflow:visible}
+.secondary-report[data-report="problem"] .dashboard-chart-viewport{max-height:none;overflow:visible}
+.secondary-report[data-report="problem"] .report-chart-card .card-header{min-height:64px;align-items:center}
+.secondary-report[data-report="problem"] .dashboard-kpi-card{min-height:84px;padding:8px 12px}
+.secondary-report[data-report="problem"] .dashboard-kpi-value{font-size:32px;line-height:1.15;margin-top:4px}
+.secondary-report[data-report="problem"] .dashboard-kpi-label{min-height:0;font-size:14px}
+.problem-org-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between;padding:8px 12px;font-size:12px;color:#52667b}
+.problem-table-tabs{min-width:0}
+.problem-table-tabs .nav{gap:4px;flex-wrap:wrap}
+.problem-table-tabs .nav-link{white-space:normal;text-align:left}
+.secondary-report[data-report="problem"] .problem-table-tabs .report-table{border:0;box-shadow:none;margin-bottom:0!important}
+.secondary-report[data-report="problem"] .problem-table-tabs .table-responsive{max-height:none;overflow-x:auto}
+.secondary-report[data-report="problem"] .problem-table-tabs .report-table th{background:#f1f5f9}
+.secondary-report[data-report="problem"] .problem-table-tabs .report-table :is(th,td){padding:8px 10px}
+@container(min-width:950px){
+ .secondary-report[data-report="problem"] .report-filters-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.5fr) auto;gap:8px}
+}
+/* Equal card/plot heights on the two-column quality report; mobile stays natural. */
+.secondary-report[data-report="problem"] .report-charts-grid{align-items:stretch}
+.secondary-report[data-report="problem"] .report-chart-card .card-title{font-size:15px;font-weight:600;line-height:1.5}
+.problem-org-modes{display:flex;flex-wrap:wrap;gap:4px;width:100%}
+.problem-org-modes .btn{font-family:inherit;font-size:12px;padding:5px 8px}
+.problem-org-modes .btn.active{color:#fff;background:#163d60;border-color:#163d60}
+#problem-division-label{display:flex;align-items:center;gap:8px;min-width:0;width:100%}
+#problem-division{min-width:0;flex:1}
+/* Contract: all organizational categories, equal desktop cards and tabbed tables. */
+.secondary-report[data-report="contract"] .report-charts-grid{align-items:stretch;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.secondary-report[data-report="contract"] .report-chart-card{overflow:visible}
+.secondary-report[data-report="contract"] .dashboard-chart-viewport{max-height:none;overflow:visible}
+.secondary-report[data-report="contract"] .report-chart-card .card-header{min-height:64px}
+.secondary-report[data-report="contract"] .report-chart-card .card-title{font-size:15px;font-weight:600;line-height:1.5}
+.secondary-report[data-report="contract"] .dashboard-kpi-card{min-height:92px;padding:10px 12px}
+.secondary-report[data-report="contract"] .dashboard-kpi-label{min-height:0;font-size:14px}
+.secondary-report[data-report="contract"] .dashboard-kpi-value{margin-top:4px;padding-top:0;font-size:32px}
+.contract-org-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 12px;font-size:12px;color:#52667b}
+.contract-org-modes{display:flex;flex-wrap:wrap;gap:4px;width:100%}
+.contract-org-modes .btn{font-family:inherit;font-size:12px;padding:5px 8px}
+.contract-org-modes .btn.active{color:#fff;background:#163d60;border-color:#163d60}
+#contract-division-label{display:flex;align-items:center;gap:8px;min-width:0;width:100%}
+#contract-division{min-width:0;flex:1}
+.contract-drill-actions>summary{padding:8px 12px;font-size:12px;cursor:pointer;color:#52667b}
+.contract-table-tabs{min-width:0}
+.contract-table-tabs .nav{gap:4px;flex-wrap:wrap}
+.contract-table-tabs .nav-link{white-space:normal;text-align:left}
+.secondary-report[data-report="contract"] .contract-table-tabs .report-table{border:0;box-shadow:none;margin-bottom:0!important}
+.secondary-report[data-report="contract"] .contract-table-tabs .table-responsive{max-height:none;overflow-x:auto}
+.secondary-report[data-report="contract"] .contract-table-tabs .report-table th{background:#f1f5f9}
+.secondary-report[data-report="contract"] .contract-table-tabs .report-table :is(th,td){padding:8px 10px}
+@container(max-width:799px){.secondary-report[data-report="contract"] .report-charts-grid{grid-template-columns:minmax(0,1fr)}}

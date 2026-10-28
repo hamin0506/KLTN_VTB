@@ -1,0 +1,140 @@
+PASS employee PK length
+PASS employee gender CHECK
+PASS employee leave/join dates
+PASS document expiry CHECK
+PASS document group CHECK
+PASS rule threshold CHECK
+PASS rule date CHECK
+PASS rule level CHECK
+PASS Secure Embed allow valid URL
+PASS Secure Embed rejects https://app.powerbi.com/view
+PASS Secure Embed rejects http://app.powerbi.com/reportEmbed
+PASS Secure Embed rejects https://evil.example/reportEmbed
+PASS Secure Embed rejects javascript:alert(1)
+PASS Secure Embed rejects https://app.powerbi.com.evil.example/reportEmbed
+PASS admin allowlist case insensitive
+PASS anonymous cannot spoof admin name
+PASS reader cannot write
+PASS unlisted user denied
+PASS four read-only View mappings
+PASS View entities are keyless
+PASS six table mappings
+PASS current document filtered unique index
+PASS no invented requirement_rule FK
+PASS department FK NO ACTION
+PASS all mapped columns match schema: document_type
+PASS all mapped columns match schema: employee
+PASS all mapped columns match schema: document
+PASS all mapped columns match schema: requirement_rule
+PASS all mapped columns match schema: department
+PASS all mapped columns match schema: division
+PASS scope query translates using View KPI flag
+PASS conflicting-state SQL query translates
+PASS quality query uses SQL View
+PASS anonymous 401 /
+PASS anonymous 401 /Divisions
+PASS anonymous 401 /Departments
+PASS anonymous 401 /Catalog?kind=employees
+PASS anonymous 401 /Quality/List?kind=documents
+PASS anonymous 401 /PowerBI
+PASS Executive Overview renders without iframe
+PASS simplified sidebar links
+PASS reader cannot delete rule
+PASS rule deletion requires CSRF
+PASS rule deletion rejects invalid id
+PASS unlisted 403
+PASS reader 403 /Divisions/Create
+PASS reader 403 /divisions/create
+PASS reader 403 /departments/edit/1
+PASS reader 403 /Departments/Edit/1
+PASS reader 403 /Catalog/Create?kind=documents
+PASS reader 403 /Catalog/Edit/1?kind=rules
+PASS reader 403 /Catalog/Delete/1?kind=types
+PASS reader POST forbidden
+PASS admin POST without CSRF 400
+PASS render /Home/Setup
+PASS render /Dashboard
+PASS render /Divisions/Create
+PASS render /__probe/grid
+PASS empty grid rendered
+PASS render /__probe/dashboard
+PASS render /__probe/record
+PASS render /__probe/profile
+PASS render /__probe/department
+PASS reader can view setup
+PASS unknown catalog 404
+PASS all feature controllers registered
+PASS GET route handles data access /Catalog?kind=employees
+DATA_ACCESS /Catalog?kind=employees 503
+PASS GET route handles data access /Catalog?kind=documents&employeeId=TEST0001
+DATA_ACCESS /Catalog?kind=documents&employeeId=TEST0001 503
+PASS GET route handles data access /Catalog?kind=types
+DATA_ACCESS /Catalog?kind=types 503
+PASS GET route handles data access /Catalog?kind=rules
+DATA_ACCESS /Catalog?kind=rules 503
+PASS GET route handles data access /Quality/List?kind=documents
+DATA_ACCESS /Quality/List?kind=documents 503
+PASS GET route handles data access /Quality/List?kind=requirements
+DATA_ACCESS /Quality/List?kind=requirements 503
+PASS GET route handles data access /Quality/List?kind=contracts
+DATA_ACCESS /Quality/List?kind=contracts 503
+PASS GET route handles data access /Quality/List?kind=employees
+DATA_ACCESS /Quality/List?kind=employees 503
+PASS GET route handles data access /Dashboard
+DATA_ACCESS /Dashboard 200
+PASS legacy report redirects /
+PASS legacy report redirects /Home/Index
+PASS legacy report redirects /PowerBI
+PASS global document list redirects to document types
+PASS sidebar accessible chevron
+PASS clean report branding
+PASS document type options do not query personnel database
+PASS COUNTROWS zero is BLANK, count preserved
+PASS DIVIDE preserves BLANK and denominator zero
+PASS DAX SWITCH unknown status is BLANK
+PASS dashboard rejects invalid sort size and slicer value
+PASS employee slicers translate via employee and department relationships
+PASS document Measure scope translates without DISTINCT
+PASS table query parameters visual filters and server pagination
+PASS COUNTROWS aggregates translate to COUNT_BIG
+PASS dashboard API anonymous blocked /Dashboard/Data
+PASS dashboard API outsider blocked /Dashboard/Data
+PASS dashboard API reader JSON success or SQL unavailable /Dashboard/Data
+PASS dashboard API anonymous blocked /Dashboard/Options
+PASS dashboard API outsider blocked /Dashboard/Options
+PASS dashboard API reader JSON success or SQL unavailable /Dashboard/Options
+PASS dashboard API anonymous blocked /Dashboard/Missing
+PASS dashboard API outsider blocked /Dashboard/Missing
+PASS dashboard API reader JSON success or SQL unavailable /Dashboard/Missing
+PASS invalid dashboard query blocked /Dashboard/Data?Statuses=NghiHuu
+PASS invalid dashboard query blocked /Dashboard/Data?DivisionIds=-1
+PASS invalid dashboard query blocked /Dashboard/Missing?Page=0
+PASS invalid dashboard query blocked /Dashboard/Missing?PageSize=10000
+PASS invalid dashboard query blocked /Dashboard/Missing?Sort=invalid
+PASS valid drill state HOP_LE
+PASS render drill HOP_LE
+PASS drill projected grouping parameterized paging without inherited KPI filter HOP_LE
+PASS valid drill state SAP_HET_HAN
+PASS render drill SAP_HET_HAN
+PASS drill projected grouping parameterized paging without inherited KPI filter SAP_HET_HAN
+PASS valid drill state DA_HET_HAN
+PASS render drill DA_HET_HAN
+PASS drill projected grouping parameterized paging without inherited KPI filter DA_HET_HAN
+PASS valid drill state KHONG_HOP_LE
+PASS render drill KHONG_HOP_LE
+PASS drill projected grouping parameterized paging without inherited KPI filter KHONG_HOP_LE
+PASS valid drill state BLANK
+PASS render drill BLANK
+PASS drill projected grouping parameterized paging without inherited KPI filter BLANK
+PASS drill anonymous blocked /Dashboard/DocumentDetails?state=HOP_LE
+PASS drill outsider blocked /Dashboard/DocumentDetails?state=HOP_LE
+PASS drill anonymous blocked /Dashboard/DocumentDetailsData?state=HOP_LE
+PASS drill outsider blocked /Dashboard/DocumentDetailsData?state=HOP_LE
+PASS invalid drill filter rejected 
+PASS invalid drill filter rejected ?state=invalid
+PASS invalid drill filter rejected ?state=HOP_LE&sort=invalid
+PASS invalid drill filter rejected ?state=HOP_LE&page=0
+PASS invalid drill filter rejected ?state=HOP_LE&overviewSort=invalid
+PASS invalid drill filter rejected ?state=HOP_LE&Statuses=NghiHuu
+PASS reader drill JSON or controlled SQL failure
+RESULT: 130 passed, 0 failed. Real database CRUD not tested.

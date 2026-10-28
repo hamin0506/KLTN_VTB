@@ -1,0 +1,1 @@
+PASS actual document chart: 30 categories retained, no dataZoom, four series, dynamic height and compact right margin. Fixtures only, no live data.

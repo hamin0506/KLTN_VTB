@@ -1,0 +1,14 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const source=fs.readFileSync('wwwroot/js/dashboard.js','utf8');
+const series=source.slice(source.indexOf('function seriesRows('),source.indexOf('function render('));
+const render=source.slice(source.indexOf(' const documents=seriesRows('),source.indexOf(" const accessible=$('accessible-chart-data')"));
+let option;const node={style:{},dataset:{}};
+const context={data:{documentsByType:[{category:'A',label:'Hợp đồng xác định thời hạn lần 1',series:'Hợp lệ',value:3},{category:'B',label:'Hợp đồng xác định thời hạn lần 1',series:'Đã hết hạn',value:2}]},colors:{},charts:[null,null,{setOption(o){option=o},resize(){}}],$:()=>node,overviewLayout:{queue(){}},EmployeeHierarchy:{wrapWords:s=>s},shared:{},emptyOption:()=>({}),number:new Intl.NumberFormat('vi-VN')};
+vm.runInNewContext(series+render,context);
+assert(option.series.every(s=>s.barWidth===12&&s.barMaxWidth===12&&s.barCategoryGap==='55%'));
+assert.equal(option.yAxis.data.length,2);assert.equal(option.yAxis.data[0],'A');
+assert.equal(option.yAxis.axisLabel.formatter('A'),'Hợp đồng xác định thời hạn lần 1');
+const tooltip=option.tooltip.formatter([{dataIndex:0}]);
+assert(tooltip.startsWith('Hợp đồng xác định thời hạn lần 1\n'));assert(tooltip.includes('Hợp lệ: 3'));assert(tooltip.includes('Đã hết hạn: 0'));assert(tooltip.includes('Sắp hết hạn: 0'));assert(tooltip.includes('Không hợp lệ: 0'));
+assert.equal(option.series[0].data[0],3);assert.equal(option.series[1].data[1],2);
+console.log('PASS Vietnamese document names and tooltip; missing categories show 0; distinct codes with identical names stay separate; counts unchanged.');

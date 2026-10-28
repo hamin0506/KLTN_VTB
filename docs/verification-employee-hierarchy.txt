@@ -1,0 +1,1 @@
+PASS three modes, ID identities despite duplicate names, division totals, drill/back, filter scope, tooltip, BLANK and no dataZoom. No real SQL/browser layout tested.

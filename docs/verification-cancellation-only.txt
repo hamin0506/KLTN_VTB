@@ -1,0 +1,4 @@
+PASS client request cancellation handled as 499
+PASS unrelated cancellation remains visible
+RESULT: 2 passed, 0 failed. No database connection attempted.
+Assembly: .scaffold/cancellation-review/Vtb.Hr.Web.dll

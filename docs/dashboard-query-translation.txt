@@ -1,0 +1,96 @@
+DECLARE @f_Statuses1 varchar(30) = 'DangLamViec';
+DECLARE @f_DivisionIds1 int = 1;
+DECLARE @f_DepartmentIds1 int = 2;
+
+SELECT [v].[department_id], [v].[employee_id], [v].[employee_quality_status], [v].[employment_status], [v].[full_name], [v].[is_managerial], [v].[join_date], [v].[labor_contract_status], [v].[leave_date], [v].[missing_document_codes], [v].[position_name], [v].[quality_issue], [v].[total_documents_missing], [v].[total_documents_present], [v].[total_required_documents]
+FROM [dbo].[vw_employee_quality] AS [v]
+WHERE [v].[employee_id] IN (
+    SELECT [e].[employee_id]
+    FROM [dbo].[employee] AS [e]
+    WHERE [e].[employment_status] = @f_Statuses1 AND EXISTS (
+        SELECT 1
+        FROM [dbo].[department] AS [d]
+        WHERE [d].[department_id] = [e].[department_id] AND [d].[division_id] = @f_DivisionIds1) AND EXISTS (
+        SELECT 1
+        FROM [dbo].[department] AS [d0]
+        WHERE [d0].[department_id] = [e].[department_id] AND EXISTS (
+            SELECT 1
+            FROM [dbo].[department] AS [d1]
+            WHERE [d1].[department_id] = @f_DepartmentIds1 AND [d1].[division_id] = [d0].[division_id] AND [d1].[department_name] = [d0].[department_name]))
+) AND [v].[employment_status] IN (N'DangLamViec', N'TamHoanHDLD')
+DECLARE @f_Statuses1 varchar(30) = 'DangLamViec';
+DECLARE @f_DivisionIds1 int = 1;
+DECLARE @f_DepartmentIds1 int = 2;
+
+SELECT [v].[document_code], [v].[document_group], [v].[document_id], [v].[document_name], [v].[employee_id], [v].[expiry_date], [v].[expiry_days], [v].[full_name], [v].[invalid_reason], [v].[is_current], [v].[is_kpi_scope], [v].[issue_date], [v].[quality_status], [v].[required_storage_form], [v].[requirement_level], [v].[storage_form], [v].[warning_threshold_days]
+FROM [dbo].[vw_document_quality] AS [v]
+WHERE [v].[employee_id] IN (
+    SELECT [e].[employee_id]
+    FROM [dbo].[employee] AS [e]
+    WHERE [e].[employment_status] = @f_Statuses1 AND EXISTS (
+        SELECT 1
+        FROM [dbo].[department] AS [d]
+        WHERE [d].[department_id] = [e].[department_id] AND [d].[division_id] = @f_DivisionIds1) AND EXISTS (
+        SELECT 1
+        FROM [dbo].[department] AS [d0]
+        WHERE [d0].[department_id] = [e].[department_id] AND EXISTS (
+            SELECT 1
+            FROM [dbo].[department] AS [d1]
+            WHERE [d1].[department_id] = @f_DepartmentIds1 AND [d1].[division_id] = [d0].[division_id] AND [d1].[department_name] = [d0].[department_name]))
+) AND [v].[is_kpi_scope] = 1
+DECLARE @f_Statuses1 varchar(30) = 'DangLamViec';
+DECLARE @f_DivisionIds1 int = 1;
+DECLARE @f_DepartmentIds1 int = 2;
+DECLARE @term_contains nvarchar(4000) = N'%'' OR 1=1 --%';
+DECLARE @term_contains0 nvarchar(200) = N'%'' OR 1=1 --%';
+DECLARE @p int = 20;
+
+SELECT [v].[employee_id] AS [EmployeeId], [v].[full_name] AS [FullName], [d].[department_name] AS [DepartmentName], [v].[total_required_documents] AS [Required], [v].[total_documents_present] AS [Present], [v].[total_documents_missing] AS [Missing], [v].[quality_issue] AS [Issue], [v].[missing_document_codes] AS [Codes]
+FROM [dbo].[vw_employee_quality] AS [v]
+INNER JOIN [dbo].[department] AS [d] ON [v].[department_id] = [d].[department_id]
+WHERE [v].[employee_id] IN (
+    SELECT [e].[employee_id]
+    FROM [dbo].[employee] AS [e]
+    WHERE [e].[employment_status] = @f_Statuses1 AND EXISTS (
+        SELECT 1
+        FROM [dbo].[department] AS [d0]
+        WHERE [d0].[department_id] = [e].[department_id] AND [d0].[division_id] = @f_DivisionIds1) AND EXISTS (
+        SELECT 1
+        FROM [dbo].[department] AS [d1]
+        WHERE [d1].[department_id] = [e].[department_id] AND EXISTS (
+            SELECT 1
+            FROM [dbo].[department] AS [d2]
+            WHERE [d2].[department_id] = @f_DepartmentIds1 AND [d2].[division_id] = [d1].[division_id] AND [d2].[department_name] = [d1].[department_name]))
+) AND [v].[employee_id] IN (
+    SELECT [e0].[employee_id]
+    FROM [dbo].[employee] AS [e0]
+    WHERE [e0].[employment_status] IN ('DangLamViec', 'TamHoanHDLD')
+) AND [v].[employee_quality_status] = N'THIEU_HO_SO' AND ([v].[employee_id] LIKE @term_contains ESCAPE N'\' OR [v].[full_name] LIKE @term_contains ESCAPE N'\' OR [d].[department_name] LIKE @term_contains0 ESCAPE N'\')
+ORDER BY [v].[total_documents_missing] DESC, [v].[employee_id]
+OFFSET @p ROWS FETCH NEXT @p ROWS ONLY
+DECLARE @f_Statuses1 varchar(30) = 'DangLamViec';
+DECLARE @f_DivisionIds1 int = 1;
+DECLARE @f_DepartmentIds1 int = 2;
+
+SELECT COUNT_BIG(*) AS [Total], COUNT_BIG(CASE
+    WHEN [v0].[employee_quality_status] = N'DAY_DU' THEN 1
+END) AS [Complete]
+FROM (
+    SELECT [v].[employee_quality_status], 1 AS [Key]
+    FROM [dbo].[vw_employee_quality] AS [v]
+    WHERE [v].[employee_id] IN (
+        SELECT [e].[employee_id]
+        FROM [dbo].[employee] AS [e]
+        WHERE [e].[employment_status] = @f_Statuses1 AND EXISTS (
+            SELECT 1
+            FROM [dbo].[department] AS [d]
+            WHERE [d].[department_id] = [e].[department_id] AND [d].[division_id] = @f_DivisionIds1) AND EXISTS (
+            SELECT 1
+            FROM [dbo].[department] AS [d0]
+            WHERE [d0].[department_id] = [e].[department_id] AND EXISTS (
+                SELECT 1
+                FROM [dbo].[department] AS [d1]
+                WHERE [d1].[department_id] = @f_DepartmentIds1 AND [d1].[division_id] = [d0].[division_id] AND [d1].[department_name] = [d0].[department_name]))
+    ) AND [v].[employment_status] IN (N'DangLamViec', N'TamHoanHDLD')
+) AS [v0]
+GROUP BY [v0].[Key]

@@ -1,0 +1,26 @@
+[
+  {
+    "Path": "/Dashboard",
+    "Error": "The request was canceled due to the configured HttpClient.Timeout of 20 seconds elapsing."
+  },
+  {
+    "Path": "/Dashboard/ProblemDocuments",
+    "Error": "The request was canceled due to the configured HttpClient.Timeout of 20 seconds elapsing."
+  },
+  {
+    "Path": "/Dashboard/Contract",
+    "Error": "The request was canceled due to the configured HttpClient.Timeout of 20 seconds elapsing."
+  },
+  {
+    "Path": "/Dashboard/ContractDetails?State=CAN_KY_KET_TIEP",
+    "Error": "The request was canceled due to the configured HttpClient.Timeout of 20 seconds elapsing."
+  },
+  {
+    "Path": "/Dashboard/ProblemData",
+    "Error": "The request was canceled due to the configured HttpClient.Timeout of 20 seconds elapsing."
+  },
+  {
+    "Path": "/Dashboard/ContractData",
+    "Error": "The request was canceled due to the configured HttpClient.Timeout of 20 seconds elapsing."
+  }
+]

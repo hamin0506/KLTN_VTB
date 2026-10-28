@@ -1,0 +1,375 @@
+PASS employee PK length
+PASS employee gender CHECK
+PASS employee leave/join dates
+PASS document expiry CHECK
+PASS document group CHECK
+PASS rule threshold CHECK
+PASS rule date CHECK
+PASS rule level CHECK
+PASS Secure Embed allow valid URL
+PASS Secure Embed rejects https://app.powerbi.com/view
+PASS Secure Embed rejects http://app.powerbi.com/reportEmbed
+PASS Secure Embed rejects https://evil.example/reportEmbed
+PASS Secure Embed rejects javascript:alert(1)
+PASS Secure Embed rejects https://app.powerbi.com.evil.example/reportEmbed
+PASS admin allowlist case insensitive
+PASS anonymous cannot spoof admin name
+PASS reader cannot write
+PASS unlisted user denied
+PASS four read-only View mappings
+PASS View entities are keyless
+PASS seven table mappings including qualification
+PASS current document filtered unique index
+PASS document current default is false
+PASS current value read back from database
+PASS INSERT ignores caller-supplied IsCurrent
+PASS UPDATE ignores caller-supplied IsCurrent
+PASS document writes compatible with AFTER INSERT trigger
+PASS creation timestamp owned by database
+PASS document form binding excludes current flag
+PASS new entity does not default current to true
+PASS no invented requirement_rule FK
+PASS department FK NO ACTION
+PASS all mapped columns match schema: document_type
+PASS all mapped columns match schema: employee
+PASS all mapped columns match schema: document
+PASS all mapped columns match schema: requirement_rule
+PASS all mapped columns match schema: department
+PASS all mapped columns match schema: division
+PASS scope query retains both KPI employment statuses without removed View column
+PASS conflicting-state SQL query translates
+PASS quality query uses SQL View
+PASS anonymous 401 /
+PASS anonymous 401 /Divisions
+PASS anonymous 401 /Departments
+PASS anonymous 401 /Catalog?kind=employees
+PASS anonymous 401 /Quality/List?kind=documents
+PASS anonymous 401 /PowerBI
+PASS Vietnamese-only overview headings and report tabs
+PASS Executive Overview renders without iframe
+PASS simplified sidebar links
+PASS reader cannot delete rule
+PASS rule deletion requires CSRF
+PASS rule deletion rejects invalid id
+PASS unlisted 403
+PASS reader 403 /Divisions/Create
+PASS reader 403 /divisions/create
+PASS reader 403 /departments/edit/1
+PASS reader 403 /Departments/Edit/1
+PASS reader 403 /Catalog/Create?kind=documents
+PASS reader 403 /Catalog/Edit/1?kind=rules
+PASS reader 403 /Catalog/Delete/1?kind=types
+PASS reader POST forbidden
+PASS admin POST without CSRF 400
+PASS render /Home/Setup
+PASS render /Dashboard
+PASS render /Divisions/Create
+PASS render /__probe/grid
+PASS empty grid rendered
+PASS render /__probe/dashboard
+PASS render /__probe/record
+PASS render /__probe/profile
+PASS render /__probe/department
+PASS reader can view setup
+PASS unknown catalog 404
+PASS all feature controllers registered
+PASS GET route handles data access /Catalog?kind=employees
+DATA_ACCESS /Catalog?kind=employees 503
+PASS GET route handles data access /Catalog?kind=documents&employeeId=TEST0001
+DATA_ACCESS /Catalog?kind=documents&employeeId=TEST0001 503
+PASS GET route handles data access /Catalog?kind=types
+DATA_ACCESS /Catalog?kind=types 503
+PASS GET route handles data access /Catalog?kind=rules
+DATA_ACCESS /Catalog?kind=rules 503
+PASS GET route handles data access /Quality/List?kind=documents
+DATA_ACCESS /Quality/List?kind=documents 503
+PASS GET route handles data access /Quality/List?kind=requirements
+DATA_ACCESS /Quality/List?kind=requirements 503
+PASS GET route handles data access /Quality/List?kind=contracts
+DATA_ACCESS /Quality/List?kind=contracts 503
+PASS GET route handles data access /Quality/List?kind=employees
+DATA_ACCESS /Quality/List?kind=employees 503
+PASS GET route handles data access /Dashboard
+DATA_ACCESS /Dashboard 200
+PASS legacy report redirects /
+PASS legacy report redirects /Home/Index
+PASS legacy report redirects /PowerBI
+PASS global document list redirects to document types
+PASS sidebar accessible chevron
+PASS clean report branding
+PASS document type options do not query personnel database
+PASS COUNTROWS zero is BLANK, count preserved
+PASS DIVIDE preserves BLANK and denominator zero
+PASS DAX SWITCH unknown status is BLANK
+PASS dashboard rejects invalid sort size and slicer value
+PASS employee slicers translate via employee and department relationships
+PASS document Measure scope translates without DISTINCT
+PASS missing table keeps KPI employment scope without removed column
+PASS full View materialization excludes both removed columns
+PASS table query parameters visual filters and server pagination
+PASS COUNTROWS aggregates translate to COUNT_BIG
+PASS dashboard API anonymous blocked /Dashboard/Data
+PASS dashboard API outsider blocked /Dashboard/Data
+PASS dashboard API reader JSON success or SQL unavailable /Dashboard/Data
+PASS dashboard API anonymous blocked /Dashboard/Options
+PASS dashboard API outsider blocked /Dashboard/Options
+PASS dashboard API reader JSON success or SQL unavailable /Dashboard/Options
+PASS dashboard API anonymous blocked /Dashboard/Missing
+PASS dashboard API outsider blocked /Dashboard/Missing
+PASS dashboard API reader JSON success or SQL unavailable /Dashboard/Missing
+PASS invalid dashboard query blocked /Dashboard/Data?Statuses=NghiHuu
+PASS invalid dashboard query blocked /Dashboard/Data?DivisionIds=-1
+PASS invalid dashboard query blocked /Dashboard/Missing?Page=0
+PASS invalid dashboard query blocked /Dashboard/Missing?PageSize=10000
+PASS invalid dashboard query blocked /Dashboard/Missing?Sort=invalid
+PASS valid drill state HOP_LE
+PASS render drill HOP_LE
+PASS drill projected grouping parameterized paging without inherited KPI filter HOP_LE
+PASS valid drill state SAP_HET_HAN
+PASS render drill SAP_HET_HAN
+PASS drill projected grouping parameterized paging without inherited KPI filter SAP_HET_HAN
+PASS valid drill state DA_HET_HAN
+PASS render drill DA_HET_HAN
+PASS drill projected grouping parameterized paging without inherited KPI filter DA_HET_HAN
+PASS valid drill state KHONG_HOP_LE
+PASS render drill KHONG_HOP_LE
+PASS drill projected grouping parameterized paging without inherited KPI filter KHONG_HOP_LE
+PASS valid drill state BLANK
+PASS render drill BLANK
+PASS drill projected grouping parameterized paging without inherited KPI filter BLANK
+PASS drill anonymous blocked /Dashboard/DocumentDetails?state=HOP_LE
+PASS drill outsider blocked /Dashboard/DocumentDetails?state=HOP_LE
+PASS drill anonymous blocked /Dashboard/DocumentDetailsData?state=HOP_LE
+PASS drill outsider blocked /Dashboard/DocumentDetailsData?state=HOP_LE
+PASS invalid drill filter rejected 
+PASS invalid drill filter rejected ?state=invalid
+PASS invalid drill filter rejected ?state=HOP_LE&sort=invalid
+PASS invalid drill filter rejected ?state=HOP_LE&page=0
+PASS invalid drill filter rejected ?state=HOP_LE&overviewSort=invalid
+PASS invalid drill filter rejected ?state=HOP_LE&Statuses=NghiHuu
+PASS reader drill JSON or controlled SQL failure
+PASS new report renders /Dashboard/ProblemDocuments
+PASS three working report tabs /Dashboard/ProblemDocuments
+PASS new report anonymous blocked /Dashboard/ProblemDocuments
+PASS new report renders /Dashboard/Contract
+PASS three working report tabs /Dashboard/Contract
+PASS new report anonymous blocked /Dashboard/Contract
+PASS new report renders /Dashboard/ContractDetails?State=CAN_KY_KET_TIEP
+PASS new report anonymous blocked /Dashboard/ContractDetails?State=CAN_KY_KET_TIEP
+PASS unfiltered requirements preserve missing document rows
+PASS requirement filters follow active document relationship
+PASS new table SQL translation problem/Id
+PASS new table SQL translation problem/Name
+PASS new table SQL translation problem/Document
+PASS new table SQL translation problem/Group
+PASS new table SQL translation problem/IssueDate
+PASS new table SQL translation problem/ExpiryDate
+PASS new table SQL translation problem/Days
+PASS new table SQL translation problem/Status
+PASS new table SQL translation problem/Reason
+PASS new table SQL translation expiring/Id
+PASS new table SQL translation expiring/Name
+PASS new table SQL translation expiring/Code
+PASS new table SQL translation expiring/Document
+PASS new table SQL translation expiring/ExpiryDate
+PASS new table SQL translation expiring/Days
+PASS new table SQL translation contractIssues/Id
+PASS new table SQL translation contractIssues/Name
+PASS new table SQL translation contractIssues/Department
+PASS new table SQL translation contractIssues/Employment
+PASS new table SQL translation contractIssues/Status
+PASS new table SQL translation expiredContracts/Id
+PASS new table SQL translation expiredContracts/Name
+PASS new table SQL translation expiredContracts/Code
+PASS new table SQL translation expiredContracts/Document
+PASS new table SQL translation expiredContracts/IssueDate
+PASS new table SQL translation expiredContracts/ExpiryDate
+PASS new table SQL translation expiredContracts/Days
+PASS new table SQL translation expiredContracts/Status
+PASS new table SQL translation contractDetail/Id
+PASS new table SQL translation contractDetail/Name
+PASS new table SQL translation contractDetail/Department
+PASS new table SQL translation contractDetail/Employment
+PASS new table SQL translation contractDetail/Status
+PASS requirement DIVIDE alternate result and subtraction
+PASS contract SWITCH preserves separate states and BLANK
+PASS report API anonymous blocked /Dashboard/ProblemData
+PASS report API outsider blocked /Dashboard/ProblemData
+PASS report reader JSON data or SQL unavailable /Dashboard/ProblemData
+PASS report API anonymous blocked /Dashboard/ContractData
+PASS report API outsider blocked /Dashboard/ContractData
+PASS report reader JSON data or SQL unavailable /Dashboard/ContractData
+PASS report API anonymous blocked /Dashboard/ReportOptions
+PASS report API outsider blocked /Dashboard/ReportOptions
+PASS report reader JSON data or SQL unavailable /Dashboard/ReportOptions
+PASS report API anonymous blocked /Dashboard/ReportTable?Kind=problem
+PASS report API outsider blocked /Dashboard/ReportTable?Kind=problem
+PASS report reader JSON data or SQL unavailable /Dashboard/ReportTable?Kind=problem
+PASS report API anonymous blocked /Dashboard/ReportTable?Kind=contractDetail&State=CAN_KY_KET_TIEP
+PASS report API outsider blocked /Dashboard/ReportTable?Kind=contractDetail&State=CAN_KY_KET_TIEP
+PASS report reader JSON data or SQL unavailable /Dashboard/ReportTable?Kind=contractDetail&State=CAN_KY_KET_TIEP
+PASS invalid new report query rejected /Dashboard/ReportTable?Kind=contractDetail
+PASS invalid new report query rejected /Dashboard/ReportTable?Kind=wrong
+PASS invalid new report query rejected /Dashboard/ReportTable?Sort=DROP
+PASS invalid new report query rejected /Dashboard/ReportTable?Page=0
+PASS invalid new report query rejected /Dashboard/ReportTable?PageSize=1000
+PASS invalid new report query rejected /Dashboard/ContractDetails?State=wrong
+PASS invalid new report query rejected /Dashboard/ContractDetails
+PASS profile groups preserve every document exactly once
+PASS profile exact group alias and visible unexpected/unassigned groups
+PASS profile grouping follows changed document type
+PASS profile duplicate warnings removed while distinct reasons and statuses remain
+PASS profile status color mapping
+PASS historical edit link follows admin permission without version link
+PASS profile warning render nullable reason and date ACER\admin
+PASS profile grouped document and count render ACER\admin
+PASS profile warning edit follows role ACER\admin
+PASS historical edit link follows admin permission without version link
+PASS profile warning render nullable reason and date TEST\reader
+PASS profile grouped document and count render TEST\reader
+PASS profile warning edit follows role TEST\reader
+PASS exact five shared options in requested order
+PASS legacy empty alias normalizes/displays --: C# null
+PASS legacy empty alias normalizes/displays --: NULL
+PASS legacy empty alias normalizes/displays --:  null 
+PASS legacy empty alias normalizes/displays --: 
+PASS legacy empty alias normalizes/displays --:    
+PASS allowed storage value: Bản gốc
+PASS allowed storage value: Bản công chứng
+PASS allowed storage value: Bản photo
+PASS allowed storage value: Bản copy
+PASS reject unsupported raw storage: Bản chính
+PASS reject unsupported raw storage: --
+PASS reject unsupported raw storage: FORGED
+PASS exact five options in create/edit/legacy/type scenario ?create=true&nullStorage=true
+PASS storage always enabled, optional and independent of type/rules ?create=true&nullStorage=true
+PASS SQL NULL/literal NULL renders -- without warning ?create=true&nullStorage=true
+PASS exact five options in create/edit/legacy/type scenario ?nullStorage=true
+PASS storage always enabled, optional and independent of type/rules ?nullStorage=true
+PASS SQL NULL/literal NULL renders -- without warning ?nullStorage=true
+PASS exact five options in create/edit/legacy/type scenario ?literalNull=true
+PASS storage always enabled, optional and independent of type/rules ?literalNull=true
+PASS SQL NULL/literal NULL renders -- without warning ?literalNull=true
+PASS exact five options in create/edit/legacy/type scenario ?needsStorage=true
+PASS storage always enabled, optional and independent of type/rules ?needsStorage=true
+PASS exact five options in create/edit/legacy/type scenario ?legacy=true
+PASS storage always enabled, optional and independent of type/rules ?legacy=true
+PASS unsupported old data outside options requires explicit replacement
+PASS POST normalizes aliases/validates whitelist: Bản gốc
+PASS POST normalizes aliases/validates whitelist: Bản công chứng
+PASS POST normalizes aliases/validates whitelist: Bản photo
+PASS POST normalizes aliases/validates whitelist: Bản copy
+PASS POST normalizes aliases/validates whitelist: 
+PASS POST stores C# null, never literal placeholder: 
+PASS POST normalizes aliases/validates whitelist: NULL
+PASS POST stores C# null, never literal placeholder: NULL
+PASS POST normalizes aliases/validates whitelist:  nUlL 
+PASS POST stores C# null, never literal placeholder:  nUlL 
+PASS POST normalizes aliases/validates whitelist:    
+PASS POST stores C# null, never literal placeholder:    
+PASS POST normalizes aliases/validates whitelist: --
+PASS POST normalizes aliases/validates whitelist: Bản chính
+PASS POST normalizes aliases/validates whitelist: FORGED
+PASS detail normalizes legacy NULL display
+PASS drill table uses same display normalization
+PASS tracked legacy literal NULL is marked for update on save, not lost by materialization
+PASS normalization preserves unchanged attachment reference
+PASS storage normalization does not clear unrelated ModelState errors
+PASS new employee contact values including leading-zero phone accepted
+PASS nullable employee contacts optional
+PASS invalid email rejected server-side
+PASS phone matches varchar(10) source DDL
+PASS qualification level required, other fields nullable
+PASS qualification order descending dates, null last, descending ID tie breaker
+PASS qualification actual source table name and PK
+PASS many degrees per employee and level, FK no cascade
+PASS no highest-degree flag
+PASS qualification ordering translates to SQL
+PASS phone mapped as string varchar(10)
+PASS new personnel routes require authentication /Profiles/Print/TEST0001
+PASS new personnel routes require authentication /Catalog/Create?kind=qualifications&employeeId=TEST0001
+PASS reader cannot mutate qualifications /Catalog/Create?kind=qualifications
+PASS reader cannot mutate qualifications /Catalog/Edit/1?kind=qualifications
+PASS reader cannot mutate qualifications /Catalog/Delete/1?kind=qualifications
+PASS qualification delete requires anti-forgery token
+PASS print renders standalone without sidebar, empty=False
+PASS print includes contacts, empty=False
+PASS print retains all degrees sorted or empty message, empty=False
+PASS independent catalogue print controls and signoff
+PASS print catalogue headings and no electronic column
+PASS print includes every catalogue type even without documents
+PASS print indicators are a two-column table without old note
+PASS print storage mark, existing logo and signatures
+PASS print renders standalone without sidebar, empty=True
+PASS print includes contacts, empty=True
+PASS print retains all degrees sorted or empty message, empty=True
+PASS independent catalogue print controls and signoff
+PASS print catalogue headings and no electronic column
+PASS print includes every catalogue type even without documents
+PASS print indicators are a two-column table without old note
+PASS print storage mark, existing logo and signatures
+PASS qualification edit fields and immutable owner
+PASS qualification deletion confirmation POST and Vietnamese date
+PASS file reference is not client-bindable
+PASS unsafe attachment reference rejected
+PASS unsafe attachment reference rejected
+PASS unsafe attachment reference rejected
+PASS unsafe attachment reference rejected
+PASS unsafe attachment reference rejected
+PASS PDF signature accepted
+PASS PNG signature accepted
+PASS JPEG signature accepted
+PASS executable extension rejected
+PASS spoofed PDF content rejected
+PASS empty upload rejected
+PASS upload above 10 MB rejected
+PASS list eye has no attachment text or download
+PASS eye enabled only for existing attachment
+PASS list eye has no attachment text or download
+PASS eye enabled only for existing attachment
+PASS list eye has no attachment text or download
+PASS eye enabled only for existing attachment
+PASS list eye has no attachment text or download
+PASS eye enabled only for existing attachment
+PASS download visible only on document details
+PASS download visible only on document details
+PASS unique attachment names never overwrite
+PASS attachments stored outside public webroot
+PASS attachment bytes preserved
+PASS traversal cannot resolve
+PASS deleting replacement leaves original intact
+PASS anonymous cannot view attachment
+PASS unauthorized account cannot view attachment
+PASS reader cannot upload attachment
+PASS attachment replacement requires CSRF
+PASS employee table responsive wrapper and sticky action classes
+PASS all employee text actions retain accessible labels
+PASS exactly seven employee headers and cells
+PASS separate employee values and text actions without hidden columns
+PASS desktop panel control is inside sidebar
+PASS single sidebar toggle, submenu and mobile backdrop render
+PASS employee list code never uses dropdown label
+PASS employee list name has no repeated code
+PASS department cell contains only department name
+PASS profile validity uses employee contract View result only
+PASS superseded trial and first fixed-term excluded even when current within own type
+PASS invalid, non-contract expired, and expiring warnings remain
+PASS source quality rows and history remain unchanged
+PASS non-valid contract status preserves expired alerts
+PASS other employee contract result cannot hide warnings
+PASS expired current contract without successor remains even if aggregate says valid
+PASS valid first fixed-term supersedes trial
+PASS valid second fixed-term supersedes first
+PASS same-type historical revision needs View valid flag and current replacement
+PASS is_current false alone never suppresses expiration
+PASS missing View result keeps all alerts on next evaluation
+PASS employment badge colors
+PASS employment display label without storage change
+PASS client request cancellation handled as 499
+PASS unrelated cancellation remains visible
+PASS type order follows first unfiltered rule; duplicate removed; unruled retained last
+PASS filtered types preserve canonical relative order
+PASS current and history adjacent by type; issue date, creation and ID tie breakers
+PASS canonical dropdown ordering translates to SQL
+PASS document ordering translates before SQL pagination
+RESULT: 365 passed, 0 failed. Real database CRUD not tested.
