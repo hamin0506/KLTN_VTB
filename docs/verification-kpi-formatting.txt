@@ -1,1 +1,0 @@
-PASS: actual rendering loop for all six KPI values: zero, one, long number, percent, BLANK. Isolated formatting inputs only; no SQL data replaced. Layout not tested.
