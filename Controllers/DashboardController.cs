@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Vtb.Hr.Web.Models;
@@ -11,7 +11,17 @@ public class DashboardController(DashboardService service,ILogger<DashboardContr
  [HttpGet]public IActionResult Index()=>View();
  [HttpGet]public Task<IActionResult> Data([FromQuery]OverviewFilter filter,CancellationToken ct)=>Read(filter,()=>service.Overview(filter,ct));
  [HttpGet]public Task<IActionResult> Options([FromQuery]OverviewFilter filter,CancellationToken ct)=>Read(filter,()=>service.Options(filter,ct));
- [HttpGet]public Task<IActionResult> Missing([FromQuery]OverviewFilter filter,CancellationToken ct)=>Read(filter,()=>service.Missing(filter,ct));
+ [HttpGet]public async Task<IActionResult> Missing([FromQuery]OverviewFilter filter,CancellationToken ct){
+  if(!ModelState.IsValid)return BadRequest(new{message="Bộ lọc hoặc phân trang không hợp lệ."});
+  try{return Json(await service.Missing(filter,ct));}
+  catch(OperationCanceledException) when(HttpContext.RequestAborted.IsCancellationRequested){return StatusCode(499);}
+  catch(DashboardListReadException e){
+   var sql=e.SqlError;
+   logger.LogError(e,"Dashboard/Missing failed. Stage={Stage}, SqlNumber={SqlNumber}, ExceptionType={ExceptionType}, TraceId={TraceId}",e.Stage,sql?.Number,e.InnerException?.GetType().Name,HttpContext.TraceIdentifier);
+   var failure=DashboardListReadException.Describe(sql?.Number);
+   return StatusCode(failure.Status,new{message=failure.Message,traceId=HttpContext.TraceIdentifier});
+  }
+ }
   [HttpGet]public IActionResult DocumentDetails([FromQuery]DocumentDrillFilter filter){if(!ModelState.IsValid)return BadRequest("Trạng thái hoặc bộ lọc không hợp lệ.");return View(filter);}
  [HttpGet]public Task<IActionResult> DocumentDetailsData([FromQuery]DocumentDrillFilter filter,CancellationToken ct)=>Read(filter.Scope(),()=>service.DocumentDetails(filter,ct));
  [HttpGet]public IActionResult ProblemDocuments()=>View();

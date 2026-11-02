@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 namespace Vtb.Hr.Web.Models;
 public class OverviewFilter : IValidatableObject
 {
@@ -21,6 +21,7 @@ public class OverviewFilter : IValidatableObject
 public record OverviewKpis(long? TotalEmployees,long? CompleteEmployees,double? CompletenessRate,long? MissingEmployees,long? ExpiringDocuments,long? ExpiredDocuments,long? InvalidDocuments,long? TotalDocuments);
 public record ChartPoint(string Category,string? Series,long Value,string? Parent=null,string? Code=null,int? DivisionId=null,int? DepartmentId=null,string? Label=null);
 public class MissingEmployeeRow {
+ public List<string> MissingDocuments{get;set;}=[];
  public string EmployeeId {get;set;}=""; public string FullName {get;set;}="";public string DepartmentName {get;set;}="";
  public int Required {get;set;}public int Present {get;set;}public int Missing {get;set;}public string? Issue {get;set;}public string? Codes {get;set;}
 }

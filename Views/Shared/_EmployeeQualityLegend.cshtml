@@ -1,0 +1,9 @@
+﻿@model GridModel
+<nav class="employee-quality-legend" aria-label="Lọc theo chất lượng hồ sơ">
+@foreach(var item in new[]{("success","Đạt yêu cầu"),("error","Cần xử lý")}){
+ var active=Model.Filter.Quality==item.Item1;
+ var description=active?"Bỏ lọc chất lượng hồ sơ":"Lọc cán bộ: "+item.Item2;
+ <a class="employee-quality-filter @(active?"is-active":"")" asp-controller="Catalog" asp-action="Index" asp-all-route-data="Model.Filter.QualityRoutes(Model.Kind,item.Item1)" aria-current="@(active?"true":null)" aria-label="@description" title="@description"><i class="employee-quality-dot employee-quality-dot--@item.Item1" aria-hidden="true"></i>@item.Item2</a>
+}
+<a class="employee-quality-filter" asp-controller="Catalog" asp-action="Index" asp-all-route-data="Model.Filter.QualityRoutes(Model.Kind,null)" aria-label="Hiển thị tất cả trạng thái chất lượng">Tất cả</a>
+</nav>

@@ -22,6 +22,7 @@ public class ReportFilter:IValidatableObject {
  }
 }
 public class ReportRow {
+ public int? DocumentId{get;set;}
  public string Id{get;set;}="";public string Name{get;set;}="";public string? Code{get;set;}public string? Document{get;set;}public string? Group{get;set;}public DateOnly? IssueDate{get;set;}public DateOnly? ExpiryDate{get;set;}public int? Days{get;set;}public string? Status{get;set;}public string? Reason{get;set;}public string? Department{get;set;}public string? Employment{get;set;}
 }
 public record ReportTable(List<ReportRow> Rows,int Total,int Page,int PageSize);

@@ -1,0 +1,6 @@
+﻿@model EmployeeQualityIndicator
+@if(Model.State is "success" or "error"){
+<span class="employee-quality-dot employee-quality-dot--@Model.State" role="img" aria-label="@Model.Tooltip" title="@Model.Tooltip"></span>
+}else{
+<span class="employee-quality-unavailable" title="Chưa có kết quả đánh giá" aria-label="Chưa có kết quả đánh giá">--</span>
+}

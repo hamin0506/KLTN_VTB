@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Vtb.Hr.Web.Data;
 using Vtb.Hr.Web.Models;
 namespace Vtb.Hr.Web.Services;
@@ -24,14 +24,22 @@ public partial class DashboardService(VtbContext db)
  public IQueryable<EmployeeQuality> EmployeeMeasureScope(OverviewFilter f){var ids=EmployeeScope(f).Select(x=>x.EmployeeId);return db.EmployeeQualities.AsNoTracking().Where(q=>ids.Contains(q.EmployeeId)&&(q.EmploymentStatus=="DangLamViec"||q.EmploymentStatus=="TamHoanHDLD"));}
  public IQueryable<DocumentQuality> DocumentMeasureScope(OverviewFilter f){var ids=EmployeeScope(f).Select(x=>x.EmployeeId);return db.DocumentQualities.AsNoTracking().Where(q=>ids.Contains(q.EmployeeId)&&q.IsKpiScope==1);}
  public IQueryable<MissingEmployeeRow> MissingQuery(OverviewFilter f){
-  var kpiIds=KpiEmployeeIds();
-  var ids=EmployeeScope(f).Select(x=>x.EmployeeId);
-  // Visual filters, not a new completeness algorithm. employee_id NOT BLANK is explicit in PBIR.
-  var q=from e in db.EmployeeQualities.AsNoTracking() join d in db.Departments on e.DepartmentId equals d.DepartmentId
-    where ids.Contains(e.EmployeeId)&&e.EmployeeId!=null&&kpiIds.Contains(e.EmployeeId)&&e.EmployeeQualityStatus=="THIEU_HO_SO"
-    select new MissingEmployeeRow{EmployeeId=e.EmployeeId,FullName=e.FullName,DepartmentName=d.DepartmentName,Required=e.TotalRequiredDocuments,Present=e.TotalDocumentsPresent,Missing=e.TotalDocumentsMissing,Issue=e.QualityIssue,Codes=e.MissingDocumentCodes};
+  var q=FollowupQuery(EmployeeScope(f).Where(e=>e.EmploymentStatus=="DangLamViec"||e.EmploymentStatus=="TamHoanHDLD"),db.EmployeeQualities.AsNoTracking(),db.LaborContractChecks.AsNoTracking(),db.Departments.AsNoTracking());
   if(!string.IsNullOrWhiteSpace(f.Search)){var term=f.Search.Trim();q=q.Where(x=>x.EmployeeId.Contains(term)||x.FullName.Contains(term)||x.DepartmentName.Contains(term));}return q;
  }
+ // EXISTS preserves one row per employee and does not multiply rows by requirements/contracts.
+ public static IQueryable<MissingEmployeeRow> FollowupQuery(IQueryable<Employee> employees,IQueryable<EmployeeQuality> qualities,IQueryable<LaborContractCheck> contracts,IQueryable<Department> departments)=>
+  from e in employees
+  join d in departments on e.DepartmentId equals d.DepartmentId
+  let missing=qualities.Where(x=>x.EmployeeId==e.EmployeeId).Max(x=>(int?)x.TotalDocumentsMissing)??0
+  let next=contracts.Any(x=>x.EmployeeId==e.EmployeeId&&x.LaborContractStatus=="CAN_KY_KET_TIEP")
+  let first=contracts.Any(x=>x.EmployeeId==e.EmployeeId&&x.LaborContractStatus=="THIEU_HDXDTH1")
+  where missing>0||next||first
+  select new MissingEmployeeRow{EmployeeId=e.EmployeeId,FullName=e.FullName,DepartmentName=d.DepartmentName,
+   Required=qualities.Where(x=>x.EmployeeId==e.EmployeeId).Max(x=>(int?)x.TotalRequiredDocuments)??0,
+   Present=qualities.Where(x=>x.EmployeeId==e.EmployeeId).Max(x=>(int?)x.TotalDocumentsPresent)??0,Missing=missing,
+   Issue=(missing>0?"Thiếu hồ sơ":"")+(next?(missing>0?"; ":"")+"Cần ký tiếp HĐLĐ":"")+(first?(missing>0||next?"; ":"")+"Thiếu HĐXĐTH1":""),
+   Codes=qualities.Where(x=>x.EmployeeId==e.EmployeeId).Select(x=>x.MissingDocumentCodes).FirstOrDefault()};
  public async Task<OverviewOptions> Options(OverviewFilter f,CancellationToken ct){
   var employees=db.Employees.AsNoTracking();if(f.Statuses.Length>0)employees=employees.Where(x=>f.Statuses.Contains(x.EmploymentStatus));
   var departments=db.Departments.AsNoTracking().Where(d=>employees.Any(e=>e.DepartmentId==d.DepartmentId));
@@ -61,11 +69,26 @@ public partial class DashboardService(VtbContext db)
   return new(new(total,complete,DaxDivide(complete,total),DaxCount(a?.Missing??0),DaxCount(b?.Expiring??0),DaxCount(b?.Expired??0),DaxCount(b?.Invalid??0),DaxCount(b?.Total??0)),dep,dist,byType,DateTimeOffset.Now);
  }
  public async Task<MissingEmployeePage> Missing(OverviewFilter f,CancellationToken ct){
+  var stage="count";
+  try{
   var q=MissingQuery(f);var total=await q.CountAsync(ct);var page=Math.Min(f.Page,Math.Max(1,(int)Math.Ceiling(total/(double)f.PageSize)));
   IOrderedQueryable<MissingEmployeeRow> sorted=f.Sort switch{
    "id"=>f.Desc?q.OrderByDescending(x=>x.EmployeeId):q.OrderBy(x=>x.EmployeeId),"name"=>f.Desc?q.OrderByDescending(x=>x.FullName):q.OrderBy(x=>x.FullName),"department"=>f.Desc?q.OrderByDescending(x=>x.DepartmentName):q.OrderBy(x=>x.DepartmentName),
    "required"=>f.Desc?q.OrderByDescending(x=>x.Required):q.OrderBy(x=>x.Required),"present"=>f.Desc?q.OrderByDescending(x=>x.Present):q.OrderBy(x=>x.Present),"issue"=>f.Desc?q.OrderByDescending(x=>x.Issue):q.OrderBy(x=>x.Issue),"codes"=>f.Desc?q.OrderByDescending(x=>x.Codes):q.OrderBy(x=>x.Codes),_=>f.Desc?q.OrderByDescending(x=>x.Missing):q.OrderBy(x=>x.Missing)};
-  return new(await sorted.ThenBy(x=>x.EmployeeId).Skip((page-1)*f.PageSize).Take(f.PageSize).ToListAsync(ct),total,page,f.PageSize);
+  stage="page";
+  var rows=await sorted.ThenBy(x=>x.EmployeeId).Skip((page-1)*f.PageSize).Take(f.PageSize).ToListAsync(ct);
+  var pageIds=rows.Select(x=>x.EmployeeId).Distinct().ToArray();
+  stage="missing-document-names";
+  var missingTypes=await db.DocumentRequirements.AsNoTracking().Where(x=>pageIds.Contains(x.EmployeeId)&&x.RequirementStatus=="THIEU_HO_SO")
+   .Select(x=>new{x.EmployeeId,x.DocumentTypeId,x.DocumentName,x.RequirementId}).ToListAsync(ct);
+  var typeIds=missingTypes.Select(x=>x.DocumentTypeId).Distinct().ToArray();
+  stage="requirement-order";
+  var orderedTypes=await db.DocumentTypes.AsNoTracking().Where(x=>typeIds.Contains(x.DocumentTypeId)).InRequirementOrder(db).Select(x=>x.DocumentTypeId).ToListAsync(ct);
+  var ranks=orderedTypes.Select((id,index)=>new{id,index}).ToDictionary(x=>x.id,x=>x.index);
+  var names=missingTypes.OrderBy(x=>ranks.GetValueOrDefault(x.DocumentTypeId,int.MaxValue)).ThenBy(x=>x.DocumentTypeId).GroupBy(x=>x.EmployeeId).ToDictionary(g=>g.Key,g=>g.DistinctBy(x=>x.DocumentTypeId).Select(x=>x.DocumentName).ToList());
+  foreach(var row in rows)row.MissingDocuments=row.Missing>0?names.GetValueOrDefault(row.EmployeeId,[]):[];
+  return new(rows,total,page,f.PageSize);
+  }catch(Exception e) when(e is not OperationCanceledException){throw new DashboardListReadException(stage,e);}
  }
 }
 

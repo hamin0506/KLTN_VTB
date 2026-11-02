@@ -8,3 +8,36 @@ appsettings.Local.json
 .keys/
 .tools/
 App_Data/
+
+# Local historical README (may contain machine-specific information)
+README_backup.md
+
+# Local configuration, IDE state and command history
+/appsettings.Development.json
+*.user
+*.suo
+.Rhistory
+.RData
+*.log
+
+# Database backups and private key material
+*.bak
+*.mdf
+*.ldf
+*.pfx
+*.p12
+*.pem
+*.key
+
+# Generated verification artifacts (tracked sensitive files need separate review)
+/docs/build-*.txt
+/docs/test-*.txt
+/docs/verification-*.txt
+/docs/*-render*.html
+/docs/report-render-*.html
+/docs/print-profile-*.html
+/docs/eye-*.html
+/docs/dashboard-api-*.json
+/docs/report-http-smoke.json
+/docs/*query*.txt
+/docs/ui-v3-source-layout.json

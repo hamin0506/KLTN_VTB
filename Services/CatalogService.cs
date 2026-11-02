@@ -40,8 +40,14 @@ public class CatalogService(VtbContext db)
  public async Task<GridModel> List<T>(string kind,Filter f) where T:class
  {
   IQueryable<T> query;
+  Dictionary<string,EmployeeQualityIndicator>? filteredIndicators=null;
   switch(kind){
-   case "employees":var e=Employees(f);if(!string.IsNullOrEmpty(f.Status))e=e.Where(x=>x.EmploymentStatus==f.Status);query=(IQueryable<T>)e.OrderBy(x=>x.EmployeeId);break;
+   case "employees":var e=Employees(f);if(!string.IsNullOrEmpty(f.Status))e=e.Where(x=>x.EmploymentStatus==f.Status);if(f.Quality!=null){
+     // Evaluate every employee in the existing search/organization/employment scope before paging.
+     filteredIndicators=await EmployeeQualityIndicators.Matching(db,e,f.Quality);
+     var matchingIds=filteredIndicators.Keys.ToArray();e=e.Where(x=>matchingIds.Contains(x.EmployeeId));
+    }
+    query=(IQueryable<T>)e.OrderBy(x=>x.EmployeeId);break;
    case "qualifications":
     var degrees=db.Qualifications.AsNoTracking();if(!string.IsNullOrWhiteSpace(f.EmployeeId))degrees=degrees.Where(x=>x.EmployeeId==f.EmployeeId);
     query=(IQueryable<T>)degrees.ByGraduation();break;
@@ -59,6 +65,7 @@ public class CatalogService(VtbContext db)
   }
   var total=await query.CountAsync();f.Page=Math.Clamp(f.Page,1,Math.Max(1,(int)Math.Ceiling(total/20d)));
   var items=await query.Skip((f.Page-1)*20).Take(20).ToListAsync();var options=await Options(kind);
+  var indicators=kind=="employees"?filteredIndicators??await EmployeeQualityIndicators.Load(db,items.Cast<Employee>().Select(x=>x.EmployeeId)):new Dictionary<string,EmployeeQualityIndicator>();
   options["Status"]=kind switch{"employees"=>options["EmploymentStatus"],"rules"=>options["RequirementLevel"],_=>Choices("HOP_LE","SAP_HET_HAN","DA_HET_HAN","KHONG_HOP_LE","KHONG_XAC_DINH")};options["Group"]=options["DocumentGroup"];
   var employeeDepartmentIds=kind=="employees"?items.Cast<Employee>().Select(e=>e.DepartmentId).Distinct().ToArray():Array.Empty<int>();
   var employeeDepartments=kind=="employees"?await db.Departments.AsNoTracking().Where(d=>employeeDepartmentIds.Contains(d.DepartmentId)).ToDictionaryAsync(d=>d.DepartmentId,d=>d.DepartmentName):new Dictionary<int,string>();
@@ -73,7 +80,7 @@ public class CatalogService(VtbContext db)
    grid.Headers=grid.Headers.Concat(new[]{"Chất lượng hiện hành"}).ToArray();
   }
   if(kind=="types")grid.Headers=new[]{"STT"}.Concat(grid.Headers).ToArray();
-  foreach(var item in items){var id=Id(item);var row=new GridRow();if(kind=="types")row.Cells.Add(((f.Page-1)*20+grid.Rows.Count+1).ToString());foreach(var field in fields){var value=Value(item,field.Name);var display=item is Document storageDocument&&field.Name=="StorageForm"?DocumentStorageForms.Display(storageDocument.StorageForm):options.TryGetValue(field.Name,out var choices)?choices.FirstOrDefault(x=>x.Value==value)?.Text??value:value;row.Cells.Add(item is Employee employee?EmployeeListValue(employee,field.Name,display,employeeDepartments):display);}
+  foreach(var item in items){var id=Id(item);var row=new GridRow{QualityIndicator=kind=="employees"?indicators.GetValueOrDefault(id,EmployeeQualityIndicator.Unknown):null};if(kind=="types")row.Cells.Add(((f.Page-1)*20+grid.Rows.Count+1).ToString());foreach(var field in fields){var value=Value(item,field.Name);var display=item is Document storageDocument&&field.Name=="StorageForm"?DocumentStorageForms.Display(storageDocument.StorageForm):options.TryGetValue(field.Name,out var choices)?choices.FirstOrDefault(x=>x.Value==value)?.Text??value:value;row.Cells.Add(item is Employee employee?EmployeeListValue(employee,field.Name,display,employeeDepartments):display);}
       if(item is Document document) {
     var results=qualityRows.Where(x=>x.DocumentId==document.DocumentId).ToList();
     row.Cells.Add(!document.IsCurrent?"Lịch sử — không đánh giá":results.Count==0?"Chưa có kết quả":string.Join("; ",results.Select(x=>Labels.Text(x.QualityStatus)+(string.IsNullOrEmpty(x.InvalidReason)?"":" — "+x.InvalidReason)).Distinct()));

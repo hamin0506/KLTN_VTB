@@ -82,3 +82,8 @@
  #executive-overview .dashboard-documents>.card-header{flex:0 0 auto}
  #executive-overview .dashboard-documents>.dashboard-chart-viewport{flex:1 1 0;min-height:0;max-height:none}
 }
+/* Focused follow-up tables: plain text, shared compact spacing. */
+#executive-overview .followup-employee-table{min-width:800px}
+#executive-overview .followup-employee-table :is(th,td){padding:9px 12px;font-size:13px;line-height:1.5;vertical-align:top;word-break:normal}
+#executive-overview .followup-employee-table th{background:#f1f5f9}
+#executive-overview .followup-employee-table td:last-child{min-width:220px;max-width:380px}

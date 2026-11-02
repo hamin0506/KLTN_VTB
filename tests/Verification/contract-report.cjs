@@ -2,7 +2,7 @@ const vm=require('vm'),fs=require('fs'),assert=require('assert');
 const nodes=new Map();function node(id){if(!nodes.has(id))nodes.set(id,{hidden:false,events:{},children:[],classList:{toggle(){}},setAttribute(k,v){this[k]=v},addEventListener(k,f){this.events[k]=f},focus(){},replaceChildren(){this.children=[]},append(x){this.children.push(x)}});return nodes.get(id);}
 const grid={columns:'500px 500px'};let drillHeight=30;
 function chart(bar){const card={querySelector(s){return s==='.card-header'?{offsetHeight:64}:s==='.contract-org-controls'&&bar?{offsetHeight:100}:s==='.contract-drill-actions'&&!bar?{offsetHeight:drillHeight}:null;}};return {dom:{style:{},parentElement:{clientWidth:500},closest(s){return s==='.report-chart-card'?card:grid}},getDom(){return this.dom},resize(){},setOption(o){this.option=o},on(k,f){this[k]=f}};}
-const ctx={window:{},document:{getElementById:node,createElement:()=>({}),querySelector:node},getComputedStyle:el=>el===grid?{gridTemplateColumns:grid.columns}:{fontFamily:'Inter, sans-serif'},Intl,Map};vm.createContext(ctx);vm.runInContext(fs.readFileSync('wwwroot/js/contract-report.js','utf8'),ctx);
+const ctx={window:{},document:{getElementById:node,createElement:()=>({}),querySelector:node},getComputedStyle:el=>el===grid?{gridTemplateColumns:grid.columns}:{fontFamily:'Inter, sans-serif'},Intl,Map};vm.createContext(ctx);vm.runInContext(fs.readFileSync('wwwroot/js/donut-total.js','utf8'),ctx);ctx.DonutTotal=ctx.window.DonutTotal;vm.runInContext(fs.readFileSync('wwwroot/js/contract-report.js','utf8'),ctx);
 const api=ctx.window.ContractReport,a=chart(true),b=chart(false);api.init([a,b],{'Hợp lệ':'#059669'});
 const organization=[{divisionId:1,divisionName:'Khối một',departmentId:11,departmentName:'Phòng trùng',count:2},{divisionId:1,divisionName:'Khối một',departmentId:12,departmentName:'Phòng hai',count:3},{divisionId:2,divisionName:'Khối hai',departmentId:21,departmentName:'Phòng trùng',count:1}];
 const data={second:[{name:'Hợp lệ',code:'HOP_LE',value:9}],contractOrganization:organization};api.setData(data);
@@ -16,3 +16,7 @@ api.setData({...data,contractOrganization:Array.from({length:35},(_,i)=>({divisi
 drillHeight=130;node('.contract-drill-actions').events.toggle();equal();
 for(const width of [1920,1440,1366,768,390]){a.dom.parentElement.clientWidth=width;b.dom.parentElement.clientWidth=width;grid.columns=width>=1024?'500px 500px':'390px';api.resize();assert.equal(a.option.yAxis.data.length,35);if(width>=1024)equal();}
 console.log('PASS contract modes, distinct category IDs, counts, full rows, matched heights, donut values/colors/state, fonts, tab state and resize. Mock DOM only.');
+
+assert.equal(b.option.graphic[0].style.text,'9');assert(b.option.graphic.every(x=>x.silent));api.setData({second:[],contractOrganization:[]});assert.equal(b.option.graphic[0].style.text,'0');console.log('PASS dynamic donut total and empty state.');
+
+assert.equal(b.option.graphic.length,1);assert.equal(b.option.graphic[0].y,parseFloat(b.dom.style.height)*.45);

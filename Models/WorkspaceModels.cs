@@ -4,12 +4,15 @@ namespace Vtb.Hr.Web.Models;
 public class Filter
 {
  public string? Q{get;set;} public int? DivisionId{get;set;}public int? DepartmentId{get;set;}public string? EmployeeId{get;set;}public int? DocumentTypeId{get;set;}
+ private string? quality;
+ public string? Quality{get=>quality;set=>quality=value is "success" or "error"?value:null;}
+ public Dictionary<string,string> QualityRoutes(string? kind,string? state){var routes=Routes(kind);routes["quality"]=Quality==state?"":state??"";routes["page"]="1";return routes;}
  public string? Status{get;set;} public string? Group{get;set;}public string? Current{get;set;}public string? Term{get;set;} public bool KpiOnly{get;set;}public int Page{get;set;}=1;
- public Dictionary<string,string> Routes(string? kind=null)=>new(){["q"]=Q??"",["divisionId"]=DivisionId?.ToString()??"",["departmentId"]=DepartmentId?.ToString()??"",["employeeId"]=EmployeeId??"",["documentTypeId"]=DocumentTypeId?.ToString()??"",["status"]=Status??"",["group"]=Group??"",["current"]=Current??"",["term"]=Term??"",["kpiOnly"]=KpiOnly.ToString(),["kind"]=kind??""};
+ public Dictionary<string,string> Routes(string? kind=null)=>new(){["q"]=Q??"",["divisionId"]=DivisionId?.ToString()??"",["departmentId"]=DepartmentId?.ToString()??"",["employeeId"]=EmployeeId??"",["documentTypeId"]=DocumentTypeId?.ToString()??"",["status"]=Status??"",["quality"]=Quality??"",["group"]=Group??"",["current"]=Current??"",["term"]=Term??"",["kpiOnly"]=KpiOnly.ToString(),["kind"]=kind??""};
 }
 public record Field(string Name,string Label,string Type="text",bool Required=false,int? Max=null);
 public record RowLink(string Label,string Controller,string Action,string? Id=null,string? Kind=null,string? EmployeeId=null,int? DocumentTypeId=null);
-public class GridRow {public List<string?> Cells{get;set;}=[];public List<RowLink> Links{get;set;}=[];}
+public class GridRow {public EmployeeQualityIndicator? QualityIndicator{get;set;}public List<string?> Cells{get;set;}=[];public List<RowLink> Links{get;set;}=[];}
 public class GridModel
 {
  public string Title{get;set;}=""; public string? Note{get;set;}public string? Kind{get;set;}

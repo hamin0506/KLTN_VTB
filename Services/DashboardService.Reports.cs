@@ -58,11 +58,11 @@ public partial class DashboardService {
    q=from c in contracts join e in db.Employees on c.EmployeeId equals e.EmployeeId select new ReportRow{Code=null,Document=null,Group=null,IssueDate=null,ExpiryDate=null,Days=null,Reason=null,Id=c.EmployeeId,Name=c.FullName,Department=c.DepartmentName,Employment=e.EmploymentStatus=="DangLamViec"?"Đang làm việc":e.EmploymentStatus=="TamHoanHDLD"?"Tạm hoãn HĐLĐ":e.EmploymentStatus=="ChamDutHDLD"?"Chấm dứt HĐLĐ":e.EmploymentStatus=="NghiHuu"?"Nghỉ hưu":"",Status=c.LaborContractStatus=="HOP_LE"?"Hợp lệ":c.LaborContractStatus=="THIEU_HDXDTH1"?"Thiếu HĐXĐTH1":c.LaborContractStatus=="CAN_KY_KET_TIEP"?"Cần ký kết tiếp":c.LaborContractStatus=="KHONG_CANH_BAO"?"Không cảnh báo":null};
   }else{
    var docs=ReportDocuments(f);
-   if(f.Kind=="problem")docs=docs.Where(x=>x.DocumentCode!="HDXDTH1"&&x.DocumentCode!="HDXDTH2"&&x.DocumentCode!="HDTHUVIEC"&&x.QualityStatus!="HOP_LE");
+   if(f.Kind=="problem")docs=docs.Where(x=>x.DocumentCode!="HDXDTH1"&&x.DocumentCode!="HDXDTH2"&&x.DocumentCode!="HDTHUVIEC"&&(x.QualityStatus=="KHONG_HOP_LE"||x.QualityStatus=="DA_HET_HAN"));
    else if(f.Kind=="expiring")docs=docs.Where(x=>x.QualityStatus=="SAP_HET_HAN");
    else docs=docs.Where(x=>x.QualityStatus=="DA_HET_HAN"&&(x.DocumentCode=="HDKXDTH"||x.DocumentCode=="HDTHUVIEC"||x.DocumentCode=="HDXDTH1"||x.DocumentCode=="HDXDTH2"));
    var problem=f.Kind=="problem";var expiring=f.Kind=="expiring";
-   q=docs.Select(x=>new ReportRow{Department=null,Employment=null,Id=x.EmployeeId,Name=x.FullName,Document=x.DocumentName,Code=problem?null:x.DocumentCode,Group=problem?x.DocumentGroup:null,IssueDate=expiring?null:x.IssueDate,ExpiryDate=x.ExpiryDate,Days=x.ExpiryDays,Reason=problem?x.InvalidReason:null,Status=expiring?null:x.QualityStatus=="HOP_LE"?"Hợp lệ":x.QualityStatus=="SAP_HET_HAN"?"Sắp hết hạn":x.QualityStatus=="DA_HET_HAN"?"Đã hết hạn":x.QualityStatus=="KHONG_HOP_LE"?"Không hợp lệ":null});
+   q=docs.Select(x=>new ReportRow{DocumentId=problem||expiring?(int?)x.DocumentId:null,Department=null,Employment=null,Id=x.EmployeeId,Name=x.FullName,Document=x.DocumentName,Code=problem?null:x.DocumentCode,Group=problem?x.DocumentGroup:null,IssueDate=expiring?null:x.IssueDate,ExpiryDate=x.ExpiryDate,Days=x.ExpiryDays,Reason=problem?x.InvalidReason:null,Status=expiring?null:x.QualityStatus=="HOP_LE"?"Hợp lệ":x.QualityStatus=="SAP_HET_HAN"?"Sắp hết hạn":x.QualityStatus=="DA_HET_HAN"?"Đã hết hạn":x.QualityStatus=="KHONG_HOP_LE"?"Không hợp lệ":null});
   }
   q=q.Distinct();if(!string.IsNullOrWhiteSpace(f.Search)){var term=f.Search.Trim();q=q.Where(x=>x.Id.Contains(term)||x.Name.Contains(term)||(x.Document!=null&&x.Document.Contains(term))||(x.Department!=null&&x.Department.Contains(term)));}return q;
  }
@@ -72,14 +72,14 @@ public partial class DashboardService {
  }
  public IOrderedQueryable<ReportRow> ReportOrderQuery(ReportFilter f){
   var q=ReportTableQuery(f);
-  var key=f.Sort==""?f.Kind=="expiring"?"ExpiryDate":f.Kind=="contractDetail"?"Name":f.Kind=="contractIssues"?"Status":"Days":f.Sort;var desc=f.Sort==""?f.Kind=="expiredContracts":f.Desc;
+  var key=f.Sort==""?f.Kind=="expiring"?"Days":f.Kind=="contractDetail"?"Name":f.Kind=="contractIssues"?"Status":"Days":f.Sort;var desc=f.Sort==""?f.Kind=="expiredContracts":f.Desc;
   var parameter=Expression.Parameter(typeof(ReportRow),"row");var property=Expression.Property(parameter,key);var lambda=Expression.Lambda(property,parameter);
   var sorted=(IOrderedQueryable<ReportRow>)q.Provider.CreateQuery<ReportRow>(Expression.Call(typeof(Queryable),desc?"OrderByDescending":"OrderBy",[typeof(ReportRow),property.Type],q.Expression,Expression.Quote(lambda)));
   foreach(var tie in ReportFilter.Columns(f.Kind).Where(x=>x!=key)){
    var member=Expression.Property(parameter,tie);var order=Expression.Lambda(member,parameter);
    sorted=(IOrderedQueryable<ReportRow>)q.Provider.CreateQuery<ReportRow>(Expression.Call(typeof(Queryable),"ThenBy",[typeof(ReportRow),member.Type],sorted.Expression,Expression.Quote(order)));
   }
-  return sorted;
+  return f.Kind is "problem" or "expiring"?sorted.ThenBy(x=>x.DocumentId):sorted;
  }
  public async Task<object> ReportOptions(ReportFilter f,CancellationToken ct){
   var employees=ReportEmployees(new ReportFilter{DivisionIds=f.DivisionIds,DepartmentIds=f.DepartmentIds,TypeIds=f.TypeIds,Groups=f.Groups});

@@ -20,7 +20,7 @@
 <div class="card-header"><h2 class="card-title" id="problem-tables-title">Danh sách hồ sơ cần theo dõi</h2></div>
 <div class="nav nav-tabs px-3" role="tablist" aria-label="Danh sách hồ sơ">
 <button type="button" class="nav-link active" id="problem-tab" role="tab" aria-selected="true" aria-controls="problem-panel">Tài liệu có vấn đề</button>
-<button type="button" class="nav-link" id="expiring-tab" role="tab" aria-selected="false" aria-controls="expiring-panel" tabindex="-1">Hồ sơ sắp hết hạn</button>
+<button type="button" class="nav-link" id="expiring-tab" role="tab" aria-selected="false" aria-controls="expiring-panel" tabindex="-1">Tài liệu sắp hết hạn</button>
 </div>
 <div id="problem-panel" role="tabpanel" aria-labelledby="problem-tab"><partial name="_ReportTables" model='@("problemTable")'/></div>
 <div id="expiring-panel" role="tabpanel" aria-labelledby="expiring-tab" hidden><partial name="_ReportTables" model='@("expiring")'/></div>

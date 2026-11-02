@@ -9,6 +9,6 @@ dotnet build "$root/Vtb.Hr.Web.csproj" --no-restore -c Debug
 if($LASTEXITCODE -ne 0){throw 'Build failed; website was not started. Close the old process if DLL files are locked.'}
 $assembly=Join-Path $root 'bin/Debug/net10.0/Vtb.Hr.Web.dll'
 Write-Host "Starting current build: $assembly"
-Write-Host 'Open http://localhost:5082. Use Windows account ACER\admin.'
+Write-Host 'Open http://localhost:5082. Use a Windows account authorized in Access configuration.'
 dotnet $assembly --contentRoot $root --urls 'http://localhost:5082'
 if($LASTEXITCODE -ne 0){throw 'Website stopped with an error. Read the message above.'}

@@ -111,3 +111,7 @@
 .secondary-report[data-report="contract"] .contract-table-tabs .report-table th{background:#f1f5f9}
 .secondary-report[data-report="contract"] .contract-table-tabs .report-table :is(th,td){padding:8px 10px}
 @container(max-width:799px){.secondary-report[data-report="contract"] .report-charts-grid{grid-template-columns:minmax(0,1fr)}}
+.secondary-report[data-report="problem"] .report-table .overview-table{min-width:720px;font-size:13px;line-height:1.5}
+.secondary-report[data-report="problem"] .report-table[data-kind="expiring"] .overview-table{min-width:620px}
+.secondary-report[data-report="problem"] .report-table td{vertical-align:top}
+.secondary-report[data-report="problem"] .report-issue-text{color:#dc2626;font-weight:500;min-width:120px}
