@@ -7,8 +7,9 @@ public partial class DashboardService
  public static string DocumentState(string status)=>status.ToUpperInvariant() switch{"HOP_LE"=>"HOP_LE","SAP_HET_HAN"=>"SAP_HET_HAN","DA_HET_HAN"=>"DA_HET_HAN","KHONG_HOP_LE"=>"KHONG_HOP_LE",_=>"BLANK"};
  public IQueryable<DocumentDrillRow> DocumentDrillQuery(DocumentDrillFilter f){
   var employees=EmployeeScope(f.Scope());
-  var docs=db.DocumentQualities.AsNoTracking();
-  // Drillthrough filters the calculated SWITCH column, not the source Measure's CALCULATE scope.
+  var docs=DocumentMeasureScope(f.Scope());
+  if(f.DocumentTypeId.HasValue)docs=docs.Where(x=>db.DocumentTypes.Any(t=>t.DocumentTypeId==f.DocumentTypeId&&t.DocumentCode==x.DocumentCode));
+  // Keep the source Dashboard personnel scope before filtering the selected quality state.
   docs=f.State=="BLANK"?docs.Where(x=>x.QualityStatus!="HOP_LE"&&x.QualityStatus!="SAP_HET_HAN"&&x.QualityStatus!="DA_HET_HAN"&&x.QualityStatus!="KHONG_HOP_LE"):docs.Where(x=>x.QualityStatus==f.State);
   var q=from d in docs join e in employees on d.EmployeeId equals e.EmployeeId join dep in db.Departments on e.DepartmentId equals dep.DepartmentId
    select new DocumentDrillRow{EmployeeId=d.EmployeeId,FullName=d.FullName,Department=dep.DepartmentName,Code=d.DocumentCode,Document=d.DocumentName,IssueDate=d.IssueDate,ExpiryDate=d.ExpiryDate,Days=d.ExpiryDays,RequiredStorage=d.RequiredStorageForm,Storage=d.StorageForm,Reason=d.InvalidReason};

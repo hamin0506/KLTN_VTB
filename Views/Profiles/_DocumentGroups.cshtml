@@ -1,10 +1,11 @@
-﻿@model ProfileModel
+@model ProfileModel
 @using Vtb.Hr.Web.Services
 @using Vtb.Hr.Web.Security
 @inject IConfiguration Config
 @{var groups=ProfilePresentation.Groups(Model);var admin=Access.Admin(User,Config);var currentCount=Model.Documents.Count(x=>x.IsCurrent);var historyCount=Model.Documents.Count-currentCount;}
-<div class="card"><div class="card-header flex-wrap gap-2"><h2 class="card-title">Tài liệu của cán bộ</h2>@if(admin){<a class="btn btn-primary ms-auto" asp-controller="Catalog" asp-action="Create" asp-route-kind="documents" asp-route-employeeId="@Model.Employee.EmployeeId">+ Thêm tài liệu</a>}</div>
+<div class="card"><div class="card-header flex-wrap gap-2"><h2 class="card-title">Tài liệu của cán bộ</h2>@if(admin){<a class="btn btn-primary ms-auto" asp-controller="Catalog" asp-action="Create" asp-route-kind="documents" asp-route-employeeId="@Model.Employee.EmployeeId" asp-route-returnUrl="@NavigationContext.Current(Context.Request)">+ Thêm tài liệu</a>}</div>
 <div class="card-body">
+@if(!ProfilePresentation.ReceivesCurrentWarnings(Model)){<p class="alert alert-info">Hồ sơ lưu trữ: giữ toàn bộ hợp đồng và tài liệu. Hiện hành/lịch sử theo phiên bản đã lưu, không đổi theo trạng thái làm việc; không tính KPI và cảnh báo hiện hành.</p>}
 <p class="text-secondary small" id="profile-document-counts">Tổng: @Model.Documents.Count tài liệu · Hiện hành: @currentCount · Lịch sử: @historyCount</p>
 @if(groups.Any(x=>x.Unexpected)){<div class="alert alert-warning" role="status">Danh mục có nhóm ngoài ba nhóm dự kiến hoặc tài liệu chưa xác định nhóm: @string.Join("; ",groups.Where(x=>x.Unexpected).Select(x=>x.Title)). Các nhóm này được giữ riêng bên dưới, không tự gán sang nhóm khác.</div>}
 @if(Model.Documents.Count==0){<p class="text-secondary">Chưa có tài liệu.</p>}

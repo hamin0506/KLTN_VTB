@@ -15,7 +15,7 @@
 #document-drill .document-state-KHONG_HOP_LE{color:#7C3AED!important;background:#7c3aed12!important}
 #document-drill .document-state-DA_HET_HAN{color:#DC2626!important;background:#dc262612!important}
 #document-drill .document-state-HOP_LE{color:#059669!important;background:#05966912!important}
-#document-drill .document-state-SAP_HET_HAN{color:#F59E0B!important;background:#182433!important}
+#document-drill .document-state-SAP_HET_HAN{color:#946200;background-color:#FFF3CD}
 
 /* KPI component: values are plain text, separate from badges and status styles. */
 .dashboard-kpi-grid{display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:1fr;gap:16px;margin-bottom:16px}
@@ -84,6 +84,58 @@
 }
 /* Focused follow-up tables: plain text, shared compact spacing. */
 #executive-overview .followup-employee-table{min-width:800px}
-#executive-overview .followup-employee-table :is(th,td){padding:9px 12px;font-size:13px;line-height:1.5;vertical-align:top;word-break:normal}
-#executive-overview .followup-employee-table th{background:#f1f5f9}
+#executive-overview .followup-employee-table :is(th,td){padding:10px 12px;font-size:14px;line-height:1.5;vertical-align:top;word-break:normal}
+#executive-overview .followup-employee-table th{background:#f1f5f9;font-size:13px}
 #executive-overview .followup-employee-table td:last-child{min-width:220px;max-width:380px}
+
+/* Document drill-through without a reason column: ten balanced columns. */
+#document-drill[data-show-reason="false"] .overview-table{width:100%;min-width:1100px;table-layout:fixed}
+#document-drill[data-show-reason="false"] .overview-table :is(th,td){white-space:normal;word-break:normal;overflow-wrap:anywhere;padding:10px 12px}
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(1){width:9%}
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(2){width:13%}
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(3){width:13%}
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(4){width:9%}
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(5){width:15%}
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(6),
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(7),
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(8){width:8%}
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(9){width:9%}
+#document-drill[data-show-reason="false"] .overview-table th:nth-child(10){width:8%}
+
+/* Shared header position for a single-step chart return action. */
+.chart-drill-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-width:0}
+.chart-drill-toolbar .card-title{min-width:0;margin:0;overflow-wrap:break-word}
+.chart-drill-back{flex:0 0 auto;align-self:center;white-space:nowrap}
+@media(max-width:575.98px){.chart-drill-toolbar{align-items:flex-start;gap:8px}}
+
+#executive-overview .overview-document-controls{flex:0 0 auto}
+
+/* Shared chart controls; scoped to dashboard cards only. */
+#executive-overview .card:has(>.chart-controls)>.card-header,
+.secondary-report .report-chart-card>.card-header{padding:12px 16px;min-height:0}
+.chart-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 16px;min-width:0;flex:0 0 auto}
+.chart-controls:has(>.chart-drill-back[hidden]:only-child){display:none}
+.chart-mode-buttons{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0}
+.chart-controls .btn{min-height:36px;padding:7px 12px;font-size:13px;line-height:20px;border-radius:var(--tblr-border-radius,4px);white-space:normal}
+.chart-mode-buttons .btn{background:var(--tblr-bg-surface,#fff);color:var(--tblr-body-color,#182433);border:1px solid var(--tblr-border-color,#dce1e7);font-weight:500}
+.chart-mode-buttons .btn[aria-pressed="true"]{background:var(--tblr-primary,#206bc4);border-color:var(--tblr-primary,#206bc4);color:#fff;font-weight:700}
+.chart-mode-buttons .btn:not([aria-pressed="true"]):hover{background:var(--tblr-primary-lt,#edf4fc);border-color:var(--tblr-primary,#206bc4)}
+.chart-controls .btn:focus-visible,.chart-controls .form-select:focus-visible{outline:2px solid var(--tblr-primary,#206bc4);outline-offset:2px}
+.chart-controls>.form-select,.chart-controls>.chart-picker{flex:1 1 180px;width:auto;min-width:0;max-width:300px;margin:0}
+.chart-controls .form-select{min-height:36px;font-size:13px}
+.chart-controls .chart-drill-back{display:inline-flex;align-items:center;gap:6px;margin-inline-start:auto;flex:0 0 auto}
+.chart-controls .chart-drill-back[hidden]{display:none}
+.chart-drill-back svg{flex:0 0 18px}
+@media(max-width:575.98px){.chart-controls>.form-select,.chart-controls>.chart-picker{max-width:100%}.chart-mode-buttons{width:100%}}
+
+/* Invalid-document drill: keep identifiers and full dates intact within the table scroller. */
+#document-drill[data-state="KHONG_HOP_LE"]{min-width:0;max-width:100%}
+#document-drill[data-state="KHONG_HOP_LE"] .table-responsive{max-width:100%;overflow-x:auto}
+#document-drill[data-state="KHONG_HOP_LE"] .overview-table{table-layout:auto;width:100%}
+#document-drill[data-state="KHONG_HOP_LE"] :is(th,td):is([data-column="code"],[data-column="issueDate"],[data-column="expiryDate"]){
+ white-space:nowrap;word-break:normal;overflow-wrap:normal;text-overflow:clip;overflow:visible;
+ max-width:none;padding-inline:12px;min-width:calc(12ch + 24px);
+}
+#document-drill[data-state="KHONG_HOP_LE"] :is(th,td)[data-column="code"]{min-width:calc(15ch + 24px)}
+#document-drill[data-state="KHONG_HOP_LE"] :is([data-column="code"],[data-column="issueDate"],[data-column="expiryDate"]) .table-sort-button{white-space:nowrap}
+#document-drill[data-state="KHONG_HOP_LE"] :is(th,td):is([data-column="document"],[data-column="reason"]){white-space:normal;word-break:normal;overflow-wrap:break-word}

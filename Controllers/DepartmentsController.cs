@@ -1,10 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Vtb.Hr.Web.Data;
 using Vtb.Hr.Web.Models;
+using Vtb.Hr.Web.Services;
 namespace Vtb.Hr.Web.Controllers;
 public class DepartmentsController(VtbContext db, IConfiguration config, ILogger<DepartmentsController> logger) : Controller
 {
@@ -46,7 +47,7 @@ public class DepartmentsController(VtbContext db, IConfiguration config, ILogger
         if (!ModelState.IsValid) return await Form(model);
         try
         {
-            if (!await db.Divisions.AnyAsync(x => x.DivisionId == model.DivisionId)) ModelState.AddModelError(nameof(model.DivisionId), "Đơn vị không còn tồn tại. Vui lòng chọn lại.");
+            if (!await db.Divisions.AnyAsync(x => x.DivisionId == model.DivisionId)) ModelState.AddModelError(nameof(model.DivisionId), "Khối không còn tồn tại. Vui lòng chọn lại.");
             if (await db.Departments.AnyAsync(x => x.DepartmentId != model.DepartmentId && x.DepartmentCode == model.DepartmentCode)) ModelState.AddModelError(nameof(model.DepartmentCode), "Mã phòng ban đã tồn tại.");
             if (!ModelState.IsValid) return await Form(model);
             var item = edit ? await db.Departments.FindAsync(model.DepartmentId) : new Department();
@@ -57,7 +58,7 @@ public class DepartmentsController(VtbContext db, IConfiguration config, ILogger
             if (!edit) db.Add(item);
             await db.SaveChangesAsync();
             TempData["Success"] = "Đã lưu phòng ban thành công.";
-            return RedirectToAction(nameof(Index));
+            return ReturnToList();
         }
         catch (DbUpdateConcurrencyException) { ModelState.AddModelError("", "Bản ghi đã thay đổi hoặc bị xóa. Vui lòng tải lại."); }
         catch (DbUpdateException ex)
@@ -65,7 +66,7 @@ public class DepartmentsController(VtbContext db, IConfiguration config, ILogger
             logger.LogWarning(ex, "Department save failed");
             ModelState.AddModelError("", ex.InnerException is SqlException sql ? sql.Number switch {
                 2601 or 2627 => "Mã phòng ban đã tồn tại.",
-                547 => "Đơn vị trực thuộc không còn tồn tại. Vui lòng chọn lại.",
+                547 => "Khối trực thuộc không còn tồn tại. Vui lòng chọn lại.",
                 _ => "Không thể lưu phòng ban. Kiểm tra kết nối và quyền truy cập."
             } : "Không thể lưu phòng ban. Vui lòng thử lại.");
         }
@@ -107,6 +108,10 @@ public class DepartmentsController(VtbContext db, IConfiguration config, ILogger
         catch (SqlException ex) { return ConnectionError(ex); }
         return RedirectToAction(nameof(Index));
     }
+ private IActionResult ReturnToList() {
+  var target=NavigationContext.OrganizationReturn(Request,"Departments");
+  return target!=null?LocalRedirect(target):RedirectToAction(nameof(Index));
+ }
     private IActionResult ConnectionError(Exception ex)
     {
         logger.LogError(ex, "Department database unavailable");

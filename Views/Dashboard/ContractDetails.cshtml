@@ -2,8 +2,12 @@
 @using Vtb.Hr.Web.Services
 @{ViewData["Title"]="Chi tiết hợp đồng theo trạng thái";}
 <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true"/><link rel="stylesheet" href="~/css/reports.css" asp-append-version="true"/>
-<section class="secondary-report" id="secondary-report" data-report="detail" data-state="@Model.State" data-table="@Url.Action("ReportTable")" data-back="@Url.Action("Contract")">
-<div class="d-flex flex-wrap gap-3 justify-content-between mb-4"><div><h1 class="page-title">Chi tiết hợp đồng theo trạng thái</h1><p class="text-secondary mt-2">@(DashboardService.ContractLabel(Model.State!)??"(Trống)")</p></div><a class="btn" id="contract-back" asp-action="Contract">Quay lại Hợp đồng lao động</a></div>
+<section class="secondary-report" id="secondary-report" data-report="detail" data-issues="@Model.IssuesOnly.ToString().ToLowerInvariant()" data-department="@Model.IssueDepartmentId" data-state="@Model.State" data-table="@Url.Action("ReportTable")" data-back="@Url.Action("Contract")">
+<div class="contract-detail-heading mb-4">
+<h1 class="page-title">Chi tiết hợp đồng theo trạng thái</h1>
+<a class="btn" id="contract-back" asp-action="Contract">Quay lại Hợp đồng lao động</a>
+<p class="contract-detail-state text-secondary">@(Model.IssuesOnly?"Cán bộ có hợp đồng cần xử lý trong phòng ban đã chọn":DashboardService.ContractLabel(Model.State!)??"(Trống)")</p>
+</div>
 <partial name="_ReportTables" model='@("detail")'/>
 </section>
 @section Scripts{<script src="~/js/reports.js" asp-append-version="true"></script>}

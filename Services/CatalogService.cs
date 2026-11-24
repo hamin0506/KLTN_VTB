@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Vtb.Hr.Web.Data;
 using Vtb.Hr.Web.Models;
@@ -20,7 +20,7 @@ public class CatalogService(VtbContext db)
   var departments=await db.Departments.AsNoTracking().Include(x=>x.Division).OrderBy(x=>x.DepartmentName).ToListAsync();
   return new(){
    ["DivisionId"]=await db.Divisions.AsNoTracking().OrderBy(x=>x.DivisionName).Select(x=>new SelectListItem(x.DivisionName,x.DivisionId.ToString())).ToListAsync(),
-   ["DepartmentId"]=departments.Select(x=>new SelectListItem(x.Division.DivisionName+" / "+x.DepartmentName,x.DepartmentId.ToString())).ToList(),
+   ["DepartmentId"]=departments.Select(x=>new SelectListItem(x.Division.DivisionName+" / "+x.DepartmentName,x.DepartmentId.ToString()){Group=new SelectListGroup{Name=x.DivisionId.ToString()}}).ToList(),
    ["EmployeeId"]=await db.Employees.AsNoTracking().OrderBy(x=>x.EmployeeId).Select(x=>new SelectListItem(x.EmployeeId+" — "+x.FullName,x.EmployeeId)).ToListAsync(),
    ["DocumentTypeId"]=await db.DocumentTypes.AsNoTracking().InRequirementOrder(db).Select(x=>new SelectListItem(x.DocumentCode+" — "+x.DocumentName,x.DocumentTypeId.ToString())).ToListAsync(),
    ["StorageForm"]=DocumentStorageForms.Options(),
@@ -37,15 +37,13 @@ public class CatalogService(VtbContext db)
   if(!string.IsNullOrEmpty(f.EmployeeId))q=q.Where(x=>x.EmployeeId==f.EmployeeId);
   return q;
  }
- public async Task<GridModel> List<T>(string kind,Filter f) where T:class
+ public async Task<GridModel> List<T>(string kind,Filter f,bool forExport=false) where T:class
  {
   IQueryable<T> query;
-  Dictionary<string,EmployeeQualityIndicator>? filteredIndicators=null;
   switch(kind){
    case "employees":var e=Employees(f);if(!string.IsNullOrEmpty(f.Status))e=e.Where(x=>x.EmploymentStatus==f.Status);if(f.Quality!=null){
-     // Evaluate every employee in the existing search/organization/employment scope before paging.
-     filteredIndicators=await EmployeeQualityIndicators.Matching(db,e,f.Quality);
-     var matchingIds=filteredIndicators.Keys.ToArray();e=e.Where(x=>matchingIds.Contains(x.EmployeeId));
+     var qualityStatus=f.Quality;
+     e=e.Where(x=>db.EmployeeQualities.Any(q=>q.EmployeeId==x.EmployeeId&&q.EmployeeQualityStatus==qualityStatus));
     }
     query=(IQueryable<T>)e.OrderBy(x=>x.EmployeeId);break;
    case "qualifications":
@@ -56,6 +54,7 @@ public class CatalogService(VtbContext db)
     var d=db.Documents.AsNoTracking().Where(x=>employeeIds.Contains(x.EmployeeId));
     if(!string.IsNullOrWhiteSpace(f.Q))d=d.Where(x=>x.EmployeeId.Contains(f.Q)||(x.SpecificName!=null&&x.SpecificName.Contains(f.Q))||db.DocumentTypes.Any(t=>t.DocumentTypeId==x.DocumentTypeId&&t.DocumentName.Contains(f.Q))||db.Employees.Any(e=>e.EmployeeId==x.EmployeeId&&e.FullName.Contains(f.Q)));
     if(f.DocumentTypeId.HasValue)d=d.Where(x=>x.DocumentTypeId==f.DocumentTypeId);
+    if(!string.IsNullOrEmpty(f.Group))d=d.Where(x=>db.DocumentTypes.Any(t=>t.DocumentTypeId==x.DocumentTypeId&&t.DocumentGroup==f.Group));
     if(f.Current=="yes")d=d.Where(x=>x.IsCurrent);if(f.Current=="no")d=d.Where(x=>!x.IsCurrent);
     if(f.Term=="dated")d=d.Where(x=>x.ExpiryDate!=null);if(f.Term=="undated")d=d.Where(x=>x.ExpiryDate==null);
     if(!string.IsNullOrEmpty(f.Status))d=d.Where(x=>db.DocumentQualities.Any(v=>v.DocumentId==x.DocumentId&&v.QualityStatus==f.Status));
@@ -63,27 +62,28 @@ public class CatalogService(VtbContext db)
    case "types":var t=db.DocumentTypes.AsNoTracking();if(!string.IsNullOrWhiteSpace(f.Q))t=t.Where(x=>x.DocumentCode.Contains(f.Q)||x.DocumentName.Contains(f.Q));if(!string.IsNullOrEmpty(f.Group))t=t.Where(x=>x.DocumentGroup==f.Group);query=(IQueryable<T>)t.InRequirementOrder(db);break;
    default:var r=db.RequirementRules.AsNoTracking();if(f.DocumentTypeId.HasValue)r=r.Where(x=>x.DocumentTypeId==f.DocumentTypeId);if(!string.IsNullOrEmpty(f.Status))r=r.Where(x=>x.RequirementLevel==f.Status);if(!string.IsNullOrWhiteSpace(f.Q))r=r.Where(x=>db.DocumentTypes.Any(t=>t.DocumentTypeId==x.DocumentTypeId&&(t.DocumentCode.Contains(f.Q)||t.DocumentName.Contains(f.Q))));query=(IQueryable<T>)r.InPageOrder();break;
   }
-  var total=await query.CountAsync();f.Page=Math.Clamp(f.Page,1,Math.Max(1,(int)Math.Ceiling(total/20d)));
-  var items=await query.Skip((f.Page-1)*20).Take(20).ToListAsync();var options=await Options(kind);
-  var indicators=kind=="employees"?filteredIndicators??await EmployeeQualityIndicators.Load(db,items.Cast<Employee>().Select(x=>x.EmployeeId)):new Dictionary<string,EmployeeQualityIndicator>();
+  var total=await query.CountAsync();if(forExport){ExcelExport.CheckCount(total);f.Page=1;}f.Page=Math.Clamp(f.Page,1,Math.Max(1,(int)Math.Ceiling(total/20d)));
+  var items=await (forExport?query:query.Skip((f.Page-1)*20).Take(20)).ToListAsync();var options=await Options(kind);
+  var indicators=kind=="employees"?await EmployeeQualityIndicators.Load(db,items.Cast<Employee>().Select(x=>x.EmployeeId)):new Dictionary<string,EmployeeQualityIndicator>();
   options["Status"]=kind switch{"employees"=>options["EmploymentStatus"],"rules"=>options["RequirementLevel"],_=>Choices("HOP_LE","SAP_HET_HAN","DA_HET_HAN","KHONG_HOP_LE","KHONG_XAC_DINH")};options["Group"]=options["DocumentGroup"];
   var employeeDepartmentIds=kind=="employees"?items.Cast<Employee>().Select(e=>e.DepartmentId).Distinct().ToArray():Array.Empty<int>();
   var employeeDepartments=kind=="employees"?await db.Departments.AsNoTracking().Where(d=>employeeDepartmentIds.Contains(d.DepartmentId)).ToDictionaryAsync(d=>d.DepartmentId,d=>d.DepartmentName):new Dictionary<int,string>();
   var fields=Fields(kind).Where(x=>x.Name is not "FilePath" and not "DateOfBirth" and not "IsManagerial").ToList();
   var grid=new GridModel{Title=Title(kind),Kind=kind,Filter=f,Total=total,Options=options,Headers=fields.Select(x=>x.Label).ToArray(),Create=new("Thêm mới","Catalog","Create",Kind:kind),Filters=kind switch{"qualifications"=>["EmployeeId"],"employees"=>["DivisionId","DepartmentId","Status"],"documents"=>["EmployeeId","DocumentTypeId","Status","Current","Term"],"types"=>["Group"],_=>["DocumentTypeId","Status"]}};
-  if(kind=="rules")grid.Note="Quy tắc tắt hoặc hết hiệu lực vẫn có thể ảnh hưởng báo cáo hiện tại.";
+  if(kind=="rules")grid.Note="Các View áp dụng quy tắc đang bật và còn hiệu lực tại ngày đánh giá.";
   if(kind=="documents")grid.Note="Bộ lọc chất lượng lấy từ View và chỉ áp dụng tài liệu hiện hành. Tài liệu lịch sử không được View đánh giá.";
     var qualityRows = new List<DocumentQuality>();
   if(kind=="documents") {
    var pageIds=items.Cast<Document>().Select(x=>x.DocumentId).ToList();
    qualityRows=await db.DocumentQualities.Where(x=>pageIds.Contains(x.DocumentId)).ToListAsync();
-   grid.Headers=grid.Headers.Concat(new[]{"Chất lượng hiện hành"}).ToArray();
+   grid.Headers=grid.Headers.Concat(forExport?new[]{"Chất lượng hiện hành","Phiên bản"}:new[]{"Chất lượng hiện hành"}).ToArray();
   }
   if(kind=="types")grid.Headers=new[]{"STT"}.Concat(grid.Headers).ToArray();
   foreach(var item in items){var id=Id(item);var row=new GridRow{QualityIndicator=kind=="employees"?indicators.GetValueOrDefault(id,EmployeeQualityIndicator.Unknown):null};if(kind=="types")row.Cells.Add(((f.Page-1)*20+grid.Rows.Count+1).ToString());foreach(var field in fields){var value=Value(item,field.Name);var display=item is Document storageDocument&&field.Name=="StorageForm"?DocumentStorageForms.Display(storageDocument.StorageForm):options.TryGetValue(field.Name,out var choices)?choices.FirstOrDefault(x=>x.Value==value)?.Text??value:value;row.Cells.Add(item is Employee employee?EmployeeListValue(employee,field.Name,display,employeeDepartments):display);}
       if(item is Document document) {
     var results=qualityRows.Where(x=>x.DocumentId==document.DocumentId).ToList();
     row.Cells.Add(!document.IsCurrent?"Lịch sử — không đánh giá":results.Count==0?"Chưa có kết quả":string.Join("; ",results.Select(x=>Labels.Text(x.QualityStatus)+(string.IsNullOrEmpty(x.InvalidReason)?"":" — "+x.InvalidReason)).Distinct()));
+    if(forExport)row.Cells.Add(document.IsCurrent?"Hiện hành":"Lịch sử");
    }
    row.Links.Add(new("Chi tiết","Catalog","Details",id,kind));row.Links.Add(new("Sửa","Catalog","Edit",id,kind));row.Links.Add(new("Xóa","Catalog","Delete",id,kind));if(kind=="employees")row.Links.Insert(0,new("Hồ sơ","Profiles","Details",id));grid.Rows.Add(row);}
   return grid;
@@ -93,6 +93,12 @@ public class CatalogService(VtbContext db)
   "EmployeeId"=>employee.EmployeeId,"FullName"=>employee.FullName,"DepartmentId"=>departments.GetValueOrDefault(employee.DepartmentId),_=>fallback};
  public static string Id(object item)=>item switch{Qualification q=>q.QualificationId.ToString(),Employee e=>e.EmployeeId,Document d=>d.DocumentId.ToString(),DocumentType t=>t.DocumentTypeId.ToString(),RequirementRule r=>r.RequirementId.ToString(),_=>""};
  public static string? Value(object item,string property)=>item.GetType().GetProperty(property)?.GetValue(item) switch {DateOnly d=>d.ToString("dd/MM/yyyy"),bool b=>b?"Có":"Không",var v=>v?.ToString()};
+ // Inclusive DATE intervals; inactive versions do not conflict. Used inside the existing serializable save transaction.
+ public static IQueryable<RequirementRule> OverlappingRules(IQueryable<RequirementRule> rules,RequirementRule candidate,bool editing)=>
+  rules.Where(x=>candidate.IsActive&&x.IsActive&&x.DocumentTypeId==candidate.DocumentTypeId
+   &&(!editing||x.RequirementId!=candidate.RequirementId)
+   &&(!x.EffectiveTo.HasValue||candidate.EffectiveFrom<=x.EffectiveTo.Value)
+   &&(!candidate.EffectiveTo.HasValue||x.EffectiveFrom<=candidate.EffectiveTo.Value));
  public async Task<List<(string Field,string Error)>> Validate(object entity,bool editing)
  {
   var errors=new List<(string,string)>();
@@ -114,7 +120,7 @@ public class CatalogService(VtbContext db)
    case RequirementRule r:
     var type=await db.DocumentTypes.AsNoTracking().SingleOrDefaultAsync(x=>x.DocumentTypeId==r.DocumentTypeId);
     if(type==null)errors.Add(("DocumentTypeId","Loại tài liệu không tồn tại."));
-    if(await db.RequirementRules.AnyAsync(x=>x.DocumentTypeId==r.DocumentTypeId&&x.RequirementId!=r.RequirementId))errors.Add(("DocumentTypeId","Đã có quy tắc cho loại này. Nhiều quy tắc làm nhân bản dòng trong View; cần rà soát SQL trước khi tạo thêm hoặc sửa bản trùng."));
+    if(await OverlappingRules(db.RequirementRules,r,editing).AnyAsync())errors.Add(("EffectiveFrom","Khoảng hiệu lực chồng lấn với một quy tắc đang kích hoạt cùng loại tài liệu. Ngày kết thúc được tính bao gồm; hãy kết thúc phiên bản cũ trước ngày bắt đầu phiên bản mới."));
     if(r.RequirementLevel=="CO_DIEU_KIEN"&&type!=null&&!new[]{"QDBONHIEM","HSBONHIEM","KEKHAITS","QDTAMHOAN","QDNGHIHUU"}.Contains(type.DocumentCode))errors.Add(("RequirementLevel","View hiện tại chưa định nghĩa điều kiện cho mã loại tài liệu này."));break;
   }
   return errors;

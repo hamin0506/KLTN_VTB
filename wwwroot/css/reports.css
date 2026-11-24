@@ -1,6 +1,6 @@
 .secondary-report .report-kpis{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
 .report-filter{position:relative}.report-filter summary{display:flex;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;border:1px solid #cbd5e1;border-radius:6px;background:#fff;padding:10px 12px}.report-filter summary:after{content:'⌄';font-weight:bold}.report-filter summary::-webkit-details-marker{display:none}.report-filter summary:focus-visible{outline:2px solid #2563eb}
-.report-filter-panel{position:absolute;z-index:100;background:#fff;left:0;right:0;border:1px solid #dbe3ed;box-shadow:0 8px 20px #18243320;border-radius:8px;padding:10px;max-height:330px;overflow:auto}.report-filter-option{display:flex;gap:10px;padding:8px 2px;align-items:flex-start;overflow-wrap:normal;word-break:normal;line-height:1.5}.report-filter-option input{margin-top:3px;flex-shrink:0}.report-table .table-size{width:80px}.secondary-report [hidden]{display:none!important}.secondary-report .overview-table{min-width:850px}.report-status-badge{font-size:12px;font-weight:600;padding:4px 7px;border-radius:5px;white-space:normal;display:inline-block;background:#f1f5f9;color:#475569}.report-table th button{white-space:normal}.secondary-report[aria-busy=true]{opacity:.65}
+.report-filter-panel{position:absolute;z-index:100;background:#fff;left:0;right:0;border:1px solid #dbe3ed;box-shadow:0 8px 20px #18243320;border-radius:8px;padding:10px;max-height:330px;overflow:auto}.report-filter-option{display:flex;gap:10px;padding:8px 2px;align-items:flex-start;overflow-wrap:normal;word-break:normal;line-height:1.5}.report-filter-option input{margin-top:3px;flex-shrink:0}.report-table .table-size{width:80px}.secondary-report [hidden]{display:none!important}.secondary-report .overview-table{min-width:850px}.report-status-badge{font-size:13px;font-weight:600;padding:4px 7px;border-radius:5px;white-space:normal;display:inline-block;background:#f1f5f9;color:#475569}.report-table th button{white-space:normal}.secondary-report[aria-busy=true]{opacity:.65}
 
 /* Keep report KPI columns usable after the shared mobile rules. */
 @media(max-width:767px){.secondary-report .report-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -63,8 +63,8 @@
 }
 /* Problem documents: all categories visible, no nested chart scrolling. */
 .secondary-report[data-report="problem"] .report-chart-card{overflow:visible}
-.secondary-report[data-report="problem"] .dashboard-chart-viewport{max-height:none;overflow:visible}
-.secondary-report[data-report="problem"] .report-chart-card .card-header{min-height:64px;align-items:center}
+.secondary-report[data-report="problem"] .dashboard-chart-viewport{max-height:none;max-width:100%;overflow-x:auto}
+.secondary-report[data-report="problem"] .report-chart-card .card-header{min-height:0;align-items:center}
 .secondary-report[data-report="problem"] .dashboard-kpi-card{min-height:84px;padding:8px 12px}
 .secondary-report[data-report="problem"] .dashboard-kpi-value{font-size:32px;line-height:1.15;margin-top:4px}
 .secondary-report[data-report="problem"] .dashboard-kpi-label{min-height:0;font-size:14px}
@@ -75,7 +75,7 @@
 .secondary-report[data-report="problem"] .problem-table-tabs .report-table{border:0;box-shadow:none;margin-bottom:0!important}
 .secondary-report[data-report="problem"] .problem-table-tabs .table-responsive{max-height:none;overflow-x:auto}
 .secondary-report[data-report="problem"] .problem-table-tabs .report-table th{background:#f1f5f9}
-.secondary-report[data-report="problem"] .problem-table-tabs .report-table :is(th,td){padding:8px 10px}
+.secondary-report[data-report="problem"] .problem-table-tabs .report-table :is(th,td){padding:10px 12px}
 @container(min-width:950px){
  .secondary-report[data-report="problem"] .report-filters-grid{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.5fr) auto;gap:8px}
 }
@@ -90,7 +90,7 @@
 /* Contract: all organizational categories, equal desktop cards and tabbed tables. */
 .secondary-report[data-report="contract"] .report-charts-grid{align-items:stretch;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .secondary-report[data-report="contract"] .report-chart-card{overflow:visible}
-.secondary-report[data-report="contract"] .dashboard-chart-viewport{max-height:none;overflow:visible}
+.secondary-report[data-report="contract"] .dashboard-chart-viewport{max-height:none;max-width:100%;overflow-x:auto}
 .secondary-report[data-report="contract"] .report-chart-card .card-header{min-height:64px}
 .secondary-report[data-report="contract"] .report-chart-card .card-title{font-size:15px;font-weight:600;line-height:1.5}
 .secondary-report[data-report="contract"] .dashboard-kpi-card{min-height:92px;padding:10px 12px}
@@ -109,9 +109,35 @@
 .secondary-report[data-report="contract"] .contract-table-tabs .report-table{border:0;box-shadow:none;margin-bottom:0!important}
 .secondary-report[data-report="contract"] .contract-table-tabs .table-responsive{max-height:none;overflow-x:auto}
 .secondary-report[data-report="contract"] .contract-table-tabs .report-table th{background:#f1f5f9}
-.secondary-report[data-report="contract"] .contract-table-tabs .report-table :is(th,td){padding:8px 10px}
+.secondary-report[data-report="contract"] .contract-table-tabs .report-table :is(th,td){padding:10px 12px}
 @container(max-width:799px){.secondary-report[data-report="contract"] .report-charts-grid{grid-template-columns:minmax(0,1fr)}}
-.secondary-report[data-report="problem"] .report-table .overview-table{min-width:720px;font-size:13px;line-height:1.5}
+.secondary-report[data-report="problem"] .report-table .overview-table{min-width:720px;font-size:14px;line-height:1.5}
 .secondary-report[data-report="problem"] .report-table[data-kind="expiring"] .overview-table{min-width:620px}
 .secondary-report[data-report="problem"] .report-table td{vertical-align:top}
 .secondary-report[data-report="problem"] .report-issue-text{color:#dc2626;font-weight:500;min-width:120px}
+
+/* Contract detail header: align the navigation button with the title, not the subtitle. */
+.secondary-report[data-report="detail"] .contract-detail-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 16px}
+.secondary-report[data-report="detail"] .contract-detail-heading .page-title{margin:0;min-width:0}
+.secondary-report[data-report="detail"] .contract-detail-state{grid-column:1/-1;margin:0}
+.secondary-report[data-report="detail"] #contract-back{align-self:center;justify-self:end;white-space:nowrap}
+@media(max-width:767.98px){.secondary-report[data-report="detail"] .contract-detail-heading{grid-template-columns:minmax(0,1fr)}.secondary-report[data-report="detail"] #contract-back{grid-row:3;justify-self:start}}
+
+.requirement-detail{width:min(1100px,calc(100vw - 24px));max-height:90dvh;overflow:auto;border:1px solid #dbe3ed;border-radius:10px;padding:20px;color:var(--tblr-body-color,#182433);background:var(--tblr-bg-surface,#fff)}
+.requirement-detail::backdrop{background:#10243d66}
+.requirement-detail .table{min-width:650px}.requirement-detail #requirement-search{max-width:100%}
+
+.secondary-report[data-report="problem"] .requirement-rate-card .dashboard-chart-viewport{max-height:480px;overflow-y:auto;min-width:0}
+
+.secondary-report[data-report] .report-chart-card>.card-header{padding:12px 16px;min-height:0}
+
+/* Shared contract status backgrounds; employee status and expired document tables are excluded. */
+.secondary-report[data-report="detail"] .contract-status-badge,
+.secondary-report[data-report="contract"] [data-kind="contractIssues"] .contract-status-badge{
+ --contract-status-hue:#64748B;--contract-status-ink:#475569;
+ color:var(--contract-status-ink);background:#f1f5f9;
+ background:var(--contract-status-background,color-mix(in srgb,var(--contract-status-hue) 14%,white));
+ font-weight:700;
+}
+
+.secondary-report[data-report="contract"] [data-kind="contractIssues"] .contract-status-badge{font-weight:600}

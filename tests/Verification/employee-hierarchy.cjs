@@ -2,7 +2,7 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
 class Element{constructor(){this.children=[];this.listeners={};this.style={};this.dataset={};this.classList={toggle(){}};}append(x){this.children.push(x);}replaceChildren(){this.children=[];}addEventListener(k,fn){this.listeners[k]=fn;}setAttribute(){}focus(){}}
 const buttons=['all','division','detail'].map(mode=>{const e=new Element();e.dataset.employeeMode=mode;return e;});
-const context={window:{},document:{createElement:()=>new Element(),querySelectorAll:()=>buttons},Intl};vm.createContext(context);vm.runInContext(fs.readFileSync('wwwroot/js/employee-hierarchy.js','utf8'),context);context.EmployeeHierarchy=context.window.EmployeeHierarchy;
+const context={window:{},document:{getElementById:()=>new Element(),createElement:()=>new Element(),querySelectorAll:()=>buttons},Intl};vm.createContext(context);vm.runInContext(fs.readFileSync('wwwroot/js/employee-hierarchy.js','utf8'),context);context.EmployeeHierarchy=context.window.EmployeeHierarchy;
 const rows=[{divisionId:1,departmentId:10,parent:'Khối A',category:'Common',code:'DAY_DU',value:2},{divisionId:1,departmentId:11,parent:'Khối A',category:'Common',code:'DAY_DU',value:3},{divisionId:1,departmentId:10,parent:'Khối A',category:'Common',code:'THIEU_HO_SO',value:1},{divisionId:2,departmentId:20,parent:'Khối A',category:'Common',code:'DAY_DU',value:7}];
 const original=JSON.stringify(rows),chart={listeners:{},on(k,fn){this.listeners[k]=fn;},setOption(x){this.option=x;},resize(){},clear(){this.option=null;}};
 const back=new Element(),crumb=new Element(),picker=new Element(),element=new Element();const h=new context.EmployeeHierarchy(chart,element,back,crumb,picker);h.setRows(rows);

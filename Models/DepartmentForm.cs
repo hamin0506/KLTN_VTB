@@ -1,11 +1,11 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.Rendering;
 namespace Vtb.Hr.Web.Models;
 public class DepartmentForm
 {
     public int DepartmentId { get; set; }
-    [Display(Name = "Đơn vị trực thuộc"), Range(1, int.MaxValue, ErrorMessage = "Vui lòng chọn đơn vị trực thuộc.")]
+    [Display(Name = "Khối trực thuộc"), Range(1, int.MaxValue, ErrorMessage = "Vui lòng chọn khối trực thuộc.")]
     public int DivisionId { get; set; }
     [Display(Name = "Mã phòng ban"), Required(ErrorMessage = "Vui lòng nhập mã phòng ban."), StringLength(20, ErrorMessage = "Mã tối đa 20 ký tự."), RegularExpression(@"[\x21-\x7E]+", ErrorMessage = "Mã dùng ký tự ASCII, không có khoảng trắng.")]
     public string DepartmentCode { get; set; } = "";

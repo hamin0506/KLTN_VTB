@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Vtb.Hr.Web.Data;
 using Vtb.Hr.Web.Models;
 namespace Vtb.Hr.Web.Services;
@@ -27,19 +27,15 @@ public partial class DashboardService(VtbContext db)
   var q=FollowupQuery(EmployeeScope(f).Where(e=>e.EmploymentStatus=="DangLamViec"||e.EmploymentStatus=="TamHoanHDLD"),db.EmployeeQualities.AsNoTracking(),db.LaborContractChecks.AsNoTracking(),db.Departments.AsNoTracking());
   if(!string.IsNullOrWhiteSpace(f.Search)){var term=f.Search.Trim();q=q.Where(x=>x.EmployeeId.Contains(term)||x.FullName.Contains(term)||x.DepartmentName.Contains(term));}return q;
  }
- // EXISTS preserves one row per employee and does not multiply rows by requirements/contracts.
+ // Read the authoritative aggregate and all reasons from the View, including zero-missing issues.
  public static IQueryable<MissingEmployeeRow> FollowupQuery(IQueryable<Employee> employees,IQueryable<EmployeeQuality> qualities,IQueryable<LaborContractCheck> contracts,IQueryable<Department> departments)=>
   from e in employees
+  join q in qualities on e.EmployeeId equals q.EmployeeId
   join d in departments on e.DepartmentId equals d.DepartmentId
-  let missing=qualities.Where(x=>x.EmployeeId==e.EmployeeId).Max(x=>(int?)x.TotalDocumentsMissing)??0
-  let next=contracts.Any(x=>x.EmployeeId==e.EmployeeId&&x.LaborContractStatus=="CAN_KY_KET_TIEP")
-  let first=contracts.Any(x=>x.EmployeeId==e.EmployeeId&&x.LaborContractStatus=="THIEU_HDXDTH1")
-  where missing>0||next||first
+  where q.EmployeeQualityStatus == "THIEU_HO_SO"
   select new MissingEmployeeRow{EmployeeId=e.EmployeeId,FullName=e.FullName,DepartmentName=d.DepartmentName,
-   Required=qualities.Where(x=>x.EmployeeId==e.EmployeeId).Max(x=>(int?)x.TotalRequiredDocuments)??0,
-   Present=qualities.Where(x=>x.EmployeeId==e.EmployeeId).Max(x=>(int?)x.TotalDocumentsPresent)??0,Missing=missing,
-   Issue=(missing>0?"Thiếu hồ sơ":"")+(next?(missing>0?"; ":"")+"Cần ký tiếp HĐLĐ":"")+(first?(missing>0||next?"; ":"")+"Thiếu HĐXĐTH1":""),
-   Codes=qualities.Where(x=>x.EmployeeId==e.EmployeeId).Select(x=>x.MissingDocumentCodes).FirstOrDefault()};
+   Required=q.TotalRequiredDocuments,Present=q.TotalDocumentsPresent,Missing=q.TotalDocumentsMissing,
+   Issue=q.QualityIssue,Codes=q.MissingDocumentCodes};
  public async Task<OverviewOptions> Options(OverviewFilter f,CancellationToken ct){
   var employees=db.Employees.AsNoTracking();if(f.Statuses.Length>0)employees=employees.Where(x=>f.Statuses.Contains(x.EmploymentStatus));
   var departments=db.Departments.AsNoTracking().Where(d=>employees.Any(e=>e.DepartmentId==d.DepartmentId));
@@ -62,8 +58,8 @@ public partial class DashboardService(VtbContext db)
   var byType=grouped.GroupBy(x=>new{x.DocumentCode,Status=DocumentState(x.QualityStatus)}).Select(g=>new ChartPoint(g.Key.DocumentCode,DocumentLabel(g.Key.Status),g.Sum(x=>x.Count),Code:g.Key.Status)).ToList();
   // Display enrichment only: grouping, sort keys, totals and filter context remain code-based.
   var typeCodes=byType.Select(x=>x.Category).Distinct().ToArray();
-  var names=await db.DocumentTypes.AsNoTracking().Where(x=>typeCodes.Contains(x.DocumentCode)).ToDictionaryAsync(x=>x.DocumentCode,x=>x.DocumentName,ct);
-  byType=byType.Select(x=>x with{Label=names.TryGetValue(x.Category,out var name)&&!string.IsNullOrWhiteSpace(name)?name:"Chưa có tên loại tài liệu"}).ToList();
+  var names=await db.DocumentTypes.AsNoTracking().Where(x=>typeCodes.Contains(x.DocumentCode)).ToDictionaryAsync(x=>x.DocumentCode,x=>new{x.DocumentName,x.DocumentTypeId,x.DocumentGroup},ct);
+  byType=byType.Select(x=>x with{Label=names.TryGetValue(x.Category,out var name)?name.DocumentName:"Chưa có tên loại tài liệu",TypeId=name?.DocumentTypeId,Group=name?.DocumentGroup}).ToList();
   var totals=byType.GroupBy(x=>x.Category).ToDictionary(g=>g.Key,g=>g.Sum(x=>x.Value));byType=byType.OrderByDescending(x=>totals[x.Category]).ThenBy(x=>x.Category,StringComparer.Ordinal).ThenBy(x=>x.Series).ToList();
   var dep=byDepartment.GroupBy(x=>new{x.DivisionId,x.DepartmentId,x.Division,x.Department,Status=EmployeeLabel(x.Status)}).Select(g=>new ChartPoint(g.Key.Department,g.Key.Status,g.Sum(x=>x.Count),g.Key.Division,g.Key.Status=="Đầy đủ"?"DAY_DU":g.Key.Status=="Thiếu hồ sơ"?"THIEU_HO_SO":"BLANK",g.Key.DivisionId,g.Key.DepartmentId)).ToList();
   return new(new(total,complete,DaxDivide(complete,total),DaxCount(a?.Missing??0),DaxCount(b?.Expiring??0),DaxCount(b?.Expired??0),DaxCount(b?.Invalid??0),DaxCount(b?.Total??0)),dep,dist,byType,DateTimeOffset.Now);

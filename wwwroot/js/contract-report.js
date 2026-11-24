@@ -1,6 +1,7 @@
-﻿(() => {
+(() => {
 'use strict';
 const number=new Intl.NumberFormat('vi-VN'),percent=new Intl.NumberFormat('vi-VN',{style:'percent',minimumFractionDigits:2,maximumFractionDigits:2});
+let fixedUnit=()=>null;
 let view='division',selected=null,organization=[],states=[],colors={},charts=[],lastWidth=[],loading=true;
 function rows(){
  if(view!=='division')return organization.filter(x=>view==='all'||x.divisionId===selected).map(x=>({name:x.departmentName,division:x.divisionName,value:x.count,code:x.departmentId})).sort(compare);
@@ -22,15 +23,16 @@ function draw(chart,data,color,isRate,metrics,height,font){
  const el=chart.getDom();el.style.minWidth='0';el.style.height=height+'px';chart.resize();
  const axis={fontFamily:font,fontSize:12,fontWeight:400,color:'#52667b',lineHeight:16,margin:10};
  const keys=data.map((x,i)=>String(x.code??'document-'+i)),names=new Map(keys.map((key,i)=>[key,data[i].name]));
- chart.setOption(data.length?{textStyle:{fontFamily:font,fontSize:12,fontWeight:400,color:'#52667b'},aria:{enabled:true},tooltip:{trigger:'axis',renderMode:'richText',confine:true,textStyle:{fontFamily:font,fontSize:13,fontWeight:400,color:'#182433'},formatter:params=>{const point=data[params[0]?.dataIndex];if(!point)return '';return point.name+(point.division?'\nĐơn vị: '+point.division:'')+'\n'+(isRate?'Tỷ lệ đáp ứng: ':'Số lượng: ')+(point.value==null?'(Trống)':isRate?percent.format(point.value):number.format(point.value));}},grid:{left:12,right:20,top:12,bottom:24,containLabel:true},xAxis:{type:'value',min:0,axisLabel:{...axis,...(isRate?{formatter:v=>percent.format(v)}:{})},...(isRate?{max:1}:{minInterval:1})},yAxis:{type:'category',inverse:true,data:keys,axisLabel:{...axis,formatter:key=>metrics.wrap(names.get(String(key))||key)}},series:[{name:isRate?'Tỷ lệ đáp ứng':'Số lượng',type:'bar',barWidth:12,barCategoryGap:'50%',data:data.map(x=>({value:x.value,code:x.code})),itemStyle:{color}}]}:{title:{text:view==='detail'&&selected===null?'Chọn đơn vị để xem phòng ban':'Không có dữ liệu',left:'center',top:'middle',textStyle:{fontFamily:font,fontSize:13,fontWeight:400}}},true);
+ chart.setOption(data.length?{textStyle:{fontFamily:font,fontSize:12,fontWeight:400,color:'#52667b'},aria:{enabled:true},tooltip:{trigger:'axis',renderMode:'richText',confine:true,textStyle:{fontFamily:font,fontSize:13,fontWeight:400,color:'#182433'},formatter:params=>{const point=data[params[0]?.dataIndex];if(!point)return '';return point.name+(point.division?'\nKhối: '+point.division:'')+'\n'+(isRate?'Tỷ lệ đáp ứng: ':'Số cán bộ: ')+(point.value==null?'(Trống)':isRate?percent.format(point.value):number.format(point.value));}},grid:{left:12,right:20,top:12,bottom:24,containLabel:true},xAxis:{type:'value',min:0,axisLabel:{...axis,...(isRate?{formatter:v=>percent.format(v)}:{})},...(isRate?{max:1}:{minInterval:1})},yAxis:{type:'category',inverse:true,data:keys,axisLabel:{...axis,formatter:key=>metrics.wrap(names.get(String(key))||key)}},series:[{name:isRate?'Tỷ lệ đáp ứng':'Số cán bộ',type:'bar',cursor:'pointer',barWidth:12,barCategoryGap:'50%',data:data.map(x=>({value:x.value,code:x.code,level:view})),itemStyle:{color}}]}:{title:{text:view==='detail'&&selected===null?'Chọn khối để xem phòng ban':'Không có dữ liệu',left:'center',top:'middle',textStyle:{fontFamily:font,fontSize:13,fontWeight:400}}},true);
 }
 function render(){
  if(charts.length!==2||loading)return;
+ if(typeof location!=='undefined'){const p=new URLSearchParams(location.search);p.set('cd_view',view);selected===null?p.delete('cd_division'):p.set('cd_division',selected);history.replaceState(null,'',location.pathname+'?'+p);}
  const chosen=organization.find(x=>x.divisionId===selected),right=rows();
- document.getElementById('contract-org-path').textContent=view==='division'?'Theo đơn vị · Nhấn thanh để xem phòng ban':view==='all'?'Tất cả phòng ban trong phạm vi lọc':chosen?'Chi tiết đơn vị / '+chosen.divisionName:'Chọn đơn vị để xem phòng ban';
- document.getElementById('contract-org-back').hidden=view==='division';
+ document.getElementById('contract-org-title').textContent='Cán bộ cần xử lý hợp đồng'+(view==='detail'&&chosen?' – '+chosen.divisionName:'');
+ document.getElementById('contract-org-back').hidden=view==='division'||fixedUnit()!==null;
  document.getElementById('contract-division-label').hidden=view!=='detail';
- for(const name of ['division','all','detail']){const button=document.getElementById('contract-mode-'+name);button.classList.toggle('active',view===name);button.setAttribute('aria-pressed',String(view===name));}
+ for(const name of ['division','all','detail']){const button=document.getElementById('contract-mode-'+name);button.classList.toggle('btn-primary',view===name);button.setAttribute('aria-pressed',String(view===name));}
  const select=document.getElementById('contract-division');select.replaceChildren();
  const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Chọn đơn vị';select.append(placeholder);
  const divisions=new Map(organization.map(x=>[x.divisionId,x.divisionName]));for(const [id,name] of divisions){const option=document.createElement('option');option.value=String(id);option.textContent=name;select.append(option);}select.value=selected===null?'':String(selected);
@@ -42,18 +44,19 @@ function render(){
  const pie=charts[1],el=pie.getDom(),height=desktop?common-metrics[1].overhead:metrics[1].height;
  el.style.height=height+'px';pie.resize();
  const radius=Math.max(30,Math.min(el.parentElement.clientWidth*.30,(height-70)*.40));
- pie.setOption({graphic:DonutTotal.graphic(DonutTotal.total(states),el.parentElement.clientWidth,height,.45,radius*.62,font),textStyle:{fontFamily:font,fontSize:12,fontWeight:400,color:'#52667b'},aria:{enabled:true},tooltip:{trigger:'item',renderMode:'richText',confine:true,textStyle:{fontFamily:font,fontSize:13,fontWeight:400},formatter:p=>p.name+'\nSố nhân viên: '+(p.value==null?'(Trống)':number.format(p.value))+'\nTỷ lệ: '+percent.format((p.percent||0)/100)},legend:{type:'scroll',bottom:8,left:12,right:12,itemGap:16,itemWidth:12,itemHeight:10,textStyle:{fontFamily:font,fontSize:12,fontWeight:400,color:'#52667b',lineHeight:18}},series:[{type:'pie',radius:[radius*.62,radius],center:['50%','45%'],label:{formatter:'{d}%',fontFamily:font,fontSize:12,fontWeight:400,color:'#52667b'},data:states.map(x=>({name:x.name,value:x.value,code:x.code,itemStyle:{color:colors[x.name]||'#64748B'}}))}]},true);
+ pie.setOption({graphic:DonutTotal.graphic(DonutTotal.total(states),el.parentElement.clientWidth,height,.45,radius*.62,font),textStyle:{fontFamily:font,fontSize:12,fontWeight:400,color:'#52667b'},aria:{enabled:true},tooltip:{trigger:'item',renderMode:'richText',confine:true,textStyle:{fontFamily:font,fontSize:13,fontWeight:400},formatter:p=>p.name+'\nSố cán bộ: '+(p.value==null?'(Trống)':number.format(p.value))+'\nTỷ lệ: '+percent.format((p.percent||0)/100)},legend:{type:'scroll',bottom:8,left:12,right:12,itemGap:16,itemWidth:12,itemHeight:10,textStyle:{fontFamily:font,fontSize:12,fontWeight:400,color:'#52667b',lineHeight:18}},series:[{type:'pie',cursor:'pointer',radius:[radius*.62,radius],center:['50%','45%'],label:{formatter:'{d}%',fontFamily:font,fontSize:12,fontWeight:400,color:'#52667b'},data:states.map(x=>({name:x.name,value:x.value,code:x.code,itemStyle:{color:colors[String(x.code||'').toUpperCase()]||'#64748B'}}))}]},true);
  charts.forEach((c,i)=>lastWidth[i]=c.getDom().parentElement.clientWidth);
 }
-function init(value,palette){
- charts=value;colors=palette;
+function init(value,palette,openDepartment,scope){
+ if(scope)fixedUnit=()=>{const ids=scope().getAll("DivisionIds");return ids.length===1?Number(ids[0]):null;};
+ charts=value;colors=palette;if(typeof location!=='undefined'){const p=new URLSearchParams(location.search);if(['division','all','detail'].includes(p.get('cd_view')))view=p.get('cd_view');selected=Number(p.get('cd_division'))||null;}
  document.querySelector('.contract-drill-actions').addEventListener('toggle',()=>render());
- charts[0].on('click',event=>{if(view!=='division')return;const id=event.data?.code;if(organization.some(x=>x.divisionId===id)){selected=id;view='detail';render();}});
+ charts[0].on('click',event=>{const id=event.data?.code;const clickedView=event.data?.level||view;if(clickedView==='division'&&organization.some(x=>x.divisionId===id)){selected=id;view='detail';render();}else if(clickedView!=='division'&&organization.some(x=>x.departmentId===id&&(view==='all'||x.divisionId===selected)))openDepartment?.(id);});
  document.getElementById('contract-org-back').addEventListener('click',()=>{view='division';selected=null;render();});
  for(const name of ['division','all','detail'])document.getElementById('contract-mode-'+name).addEventListener('click',()=>{view=name;render();});
  document.getElementById('contract-division').addEventListener('change',e=>{selected=e.target.value===''?null:Number(e.target.value);render();});
  const tabs=['contractIssues','expiredContracts'];function activate(key){for(const name of tabs){const active=name===key,tab=document.getElementById(name+'-tab');tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;document.getElementById(name+'-panel').hidden=!active;}}
  for(const name of tabs){const tab=document.getElementById(name+'-tab');tab.addEventListener('click',()=>activate(name));tab.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?'contractIssues':e.key==='End'?'expiredContracts':name==='contractIssues'?'expiredContracts':'contractIssues';activate(next);document.getElementById(next+'-tab').focus();}});}
 }
-window.ContractReport={init,clear(){loading=true;},setData(data){loading=false;states=data.second;organization=data.contractOrganization||[];if(selected!==null&&!organization.some(x=>x.divisionId===selected)){selected=null;if(view==='detail')view='division';}render();},reset(){selected=null;view='division';},resize(){if(charts.some((c,i)=>c.getDom().parentElement.clientWidth!==lastWidth[i]))render();},rate};
+window.ContractReport={init,clear(){loading=true;},setData(data){loading=false;states=data.second;organization=data.contractOrganization||[];if(fixedUnit()!==null&&view==='division'){selected=fixedUnit();view='detail';}if(selected!==null&&!organization.some(x=>x.divisionId===selected)){selected=null;if(view==='detail')view='division';}render();},reset(){selected=null;view='division';},resize(){if(charts.some((c,i)=>c.getDom().parentElement.clientWidth!==lastWidth[i]))render();},rate};
 })();

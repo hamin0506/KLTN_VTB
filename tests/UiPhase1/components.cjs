@@ -1,0 +1,23 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+let count=0;function check(ok,name){assert.ok(ok,name);count++;console.log('PASS '+name);}
+let focus='',observe;
+const input={id:'Email',name:'Email',attrs:{'aria-describedby':'existing-help'},getAttribute(k){return this.attrs[k];},setAttribute(k,v){this.attrs[k]=v;},closest(){return {querySelector:()=>hint};},focus(){focus=this.id;}};
+const hint={id:''},error={id:'',dataset:{valmsgFor:'Email'},textContent:'Email không hợp lệ',invalid:true,classList:{contains(){return error.invalid;}}};
+const region={attrs:{},hasAttribute(k){return k in this.attrs;},setAttribute(k,v){this.attrs[k]=v;}};
+const form={querySelectorAll(q){return q==='[data-valmsg-for]'?[error]:[input];},querySelector(){return null;}};
+const document={querySelectorAll:q=>q==='.ui-form'?[form]:[region]};
+vm.runInNewContext(fs.readFileSync('wwwroot/js/ui-components.js','utf8'),{document,MutationObserver:class{constructor(fn){observe=fn;}observe(){}}});
+check(input.attrs['aria-invalid']==='true','server error exposed to assistive technology');
+check(input.attrs['aria-describedby']==='existing-help Email-error Email-hint','existing description retained with error and hint');
+check(error.id==='Email-error'&&hint.id==='Email-hint','message IDs linked');
+check(focus==='Email','first invalid field receives focus');
+check(region.tabIndex===0&&region.attrs.role==='region'&&region.attrs['aria-label'],'table scroll region keyboard accessible');
+error.invalid=false;error.textContent='';observe();
+check(input.attrs['aria-invalid']==='false','cleared validation no longer announced invalid');
+observe();check(input.attrs['aria-describedby']==='existing-help Email-error Email-hint','repeated sync does not duplicate descriptions');
+const script=fs.readFileSync('wwwroot/js/reports.js','utf8');const fn=script.match(/function reportDeadline\(row\)\{[^\n]+/)[0];const ctx={number:new Intl.NumberFormat('vi-VN')};vm.createContext(ctx);vm.runInContext(fn,ctx);
+check(ctx.reportDeadline({expiryDate:'2026-01-01',days:null})==='—','null deadline not coerced to zero');
+check(ctx.reportDeadline({expiryDate:'2026-01-01',days:0})==='Hết hạn hôm nay','zero deadline explicit');
+check(ctx.reportDeadline({expiryDate:'2026-01-01',days:-3})==='Quá hạn 3 ngày','negative deadline explained');
+check(ctx.reportDeadline({expiryDate:'2026-01-01',days:3})==='Còn 3 ngày','positive deadline explained');
+console.log(count+' phase 2 JavaScript checks passed; simulated DOM, not browser verification.');

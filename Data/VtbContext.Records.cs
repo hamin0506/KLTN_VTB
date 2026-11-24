@@ -34,5 +34,6 @@ public partial class VtbContext
   m.Entity<LaborContractCheck>().HasNoKey().ToView("vw_labor_contract_check","dbo");
   foreach(var type in new[]{typeof(Qualification),typeof(Employee),typeof(Document),typeof(DocumentType),typeof(RequirementRule),typeof(DocumentQuality),typeof(EmployeeQuality),typeof(DocumentRequirement),typeof(LaborContractCheck)})
    foreach(var p in m.Entity(type).Metadata.GetProperties())p.SetColumnName(Snake(p.Name));
+  m.Entity<DocumentQuality>().Property(x=>x.IsKpiScope).HasColumnName("working_status");
  }
 }

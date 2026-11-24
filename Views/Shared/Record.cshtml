@@ -3,30 +3,34 @@
 @{
  ViewData["Title"]=(Model.Deleting?"Xác nhận xóa":Model.ReadOnly?"Chi tiết":Model.Editing?"Chỉnh sửa":"Thêm mới")+" · "+Model.Title;}
 <h1 class="page-title mb-4">@ViewData["Title"]</h1>
-@if(Model.Kind=="rules"){<div class="alert alert-warning">Mỗi loại tài liệu chỉ có một quy tắc trong giao diện này. Quy tắc tắt hoặc hết hiệu lực vẫn có thể ảnh hưởng báo cáo.</div>}
-@if(Model.Deleting&&Model.Kind=="rules"){<div class="alert alert-warning">Xóa yêu cầu này sẽ thay đổi kết quả đánh giá hồ sơ và thống kê theo các SQL View. Tài liệu đã lưu không bị xóa.</div>}
+@if(Model.Kind=="rules"&&!Model.Deleting){<div class="alert alert-warning">Một loại tài liệu có thể có nhiều phiên bản quy tắc, nhưng khoảng hiệu lực của các phiên bản đang kích hoạt không được chồng lấn. Ngày kết thúc được tính bao gồm; để trống nghĩa là chưa có ngày kết thúc, nên cần kết thúc phiên bản cũ trước ngày bắt đầu phiên bản mới.</div>}
+@if(Model.Deleting&&Model.Kind=="rules"){<div class="alert alert-warning">Xóa yêu cầu này sẽ thay đổi kết quả đánh giá hồ sơ và thống kê hiện tại. Tài liệu đã lưu không bị xóa.</div>}
 @if(Model.Deleting){<div class="alert alert-danger">Bạn đang yêu cầu xóa bản ghi. Không thể hoàn tác từ giao diện. Bản ghi đang được tham chiếu sẽ bị chặn xóa.</div>}
-<div class="card"><div class="card-body p-4"><form asp-controller="Catalog" asp-action="@(Model.Deleting?"Delete":Model.Editing?"Edit":"Create")" asp-route-kind="@Model.Kind" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
-<div asp-validation-summary="All" class="alert alert-danger" role="alert"></div><div class="row g-4">
-@foreach(var field in Model.Fields){var value=ViewData.ModelState.TryGetValue(field.Name,out var posted)&&posted.AttemptedValue!=null?posted.AttemptedValue:Model.Value(field.Name);var storageField=Model.Kind=="documents"&&field.Name=="StorageForm";if(storageField)value=DocumentStorageForms.Normalize(value);var required=field.Required;var read=Model.ReadOnly||(Model.Editing&&(Model.Kind=="employees"||Model.Kind=="qualifications")&&field.Name=="EmployeeId")||(Model.Editing&&Model.Kind=="documents"&&field.Name=="EmployeeId");if(read&&field.Type=="date")value=CatalogService.Value(Model.Entity,field.Name);
-<div class="col-md-6"><label class="form-label @(required?"required":"")" for="@field.Name">@field.Label</label>
+<div class="card"><div class="card-body p-4"><form class="ui-form" asp-controller="Catalog" asp-action="@(Model.Deleting?"Delete":Model.Editing?"Edit":"Create")" asp-route-kind="@Model.Kind" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data"><input type="hidden" name="returnUrl" value="@NavigationContext.Return(Context.Request)"/>
+@if(!Model.ReadOnly){<p class="form-hint mb-3">Các trường có dấu * là bắt buộc.</p>}
+<div asp-validation-summary="All" class="alert alert-danger" role="alert" tabindex="-1"></div><div class="row g-4">
+@foreach(var field in Model.Fields){var value=ViewData.ModelState.TryGetValue(field.Name,out var posted)&&posted.AttemptedValue!=null?posted.AttemptedValue:Model.Value(field.Name);var storageField=Model.Kind=="documents"&&field.Name=="StorageForm";if(storageField)value=DocumentStorageForms.Normalize(value);var required=field.Required;var errorId=field.Name+"-error";var hintId=field.Name+"-hint";var invalid=ViewData.ModelState.TryGetValue(field.Name,out var state)&&state.Errors.Count>0;var hint=Model.Kind=="employees"&&field.Name=="EmployeeId"?"Đúng 8 ký tự ASCII, không chứa khoảng trắng.":field.Name=="PhoneNumber"?"Nhập dưới dạng chuỗi để giữ số 0 ở đầu; tối đa 10 ký tự.":field.Name=="Email"?"Nếu nhập, sử dụng địa chỉ email hợp lệ.":field.Name=="WarningThresholdDays"?"Số ngày dùng làm ngưỡng cảnh báo trước khi hết hạn.":field.Name is "Notes" or "Description"?$"Tối đa {field.Max} ký tự.":null;var described=errorId+(hint!=null?" "+hintId:"")+(storageField?" storage-form-help":"");var read=Model.ReadOnly||(Model.Editing&&(Model.Kind=="employees"||Model.Kind=="qualifications")&&field.Name=="EmployeeId")||(Model.Editing&&Model.Kind=="documents"&&field.Name=="EmployeeId");if(read&&field.Type=="date")value=CatalogService.Value(Model.Entity,field.Name);
+@if(Model.Kind=="employees"&&(field.Name=="EmployeeId"||field.Name=="DepartmentId")){<div class="col-12"><h2 class="ui-form-section">@(field.Name=="EmployeeId"?"Thông tin cá nhân":"Thông tin công tác")</h2></div>}
+<div class="@(field.Name is "Notes" or "Description"?"col-12":"col-md-6")"><label class="form-label @(required?"required":"")" for="@field.Name">@field.Label</label>
 @if(read&&storageField){<div class="form-control-plaintext" title="@(DocumentStorageForms.Normalize(Model.Value(field.Name)) is null?DocumentStorageForms.EmptyDescription:null)">@DocumentStorageForms.Display(Model.Value(field.Name))</div>}
 else if(read){<div class="form-control-plaintext">@(Model.Options.TryGetValue(field.Name,out var choices)?choices.FirstOrDefault(x=>x.Value==value)?.Text??value:field.Type=="checkbox"?(value=="true"?"Có":"Không"):value??"—")</div>}
 else if(field.Type=="select"){
  var unsupportedStorage=storageField&&(!DocumentStorageForms.IsAllowed(value)||!DocumentStorageForms.IsAllowed(DocumentStorageForms.Normalize(Model.OriginalStorageForm)));
- <select name="@field.Name" id="@field.Name" class="form-select" required="@required" aria-describedby="@(storageField?"storage-form-help":null)">
+ <select name="@field.Name" id="@field.Name" class="form-select" required="@required" aria-describedby="@described" aria-invalid="@(invalid?"true":"false")">
  @if(!storageField){<option value="">— Chọn @field.Label.ToLower() —</option>}
  @foreach(var option in storageField?DocumentStorageForms.Options():Model.Options.GetValueOrDefault(field.Name,[])){
  <option value="@option.Value" title="@(storageField&&option.Value==""?DocumentStorageForms.EmptyDescription:null)" selected="@(option.Value==(value??""))">@option.Text</option>
  }</select>
- @if(storageField){<div id="storage-form-help" class="form-hint">--: Không có hình thức lưu trữ. Danh sách áp dụng cho mọi loại tài liệu; chất lượng vẫn được đánh giá theo quy tắc SQL.</div>}
+ @if(storageField){<div id="storage-form-help" class="form-hint">--: Không có hình thức lưu trữ. Danh sách áp dụng cho mọi loại tài liệu; chất lượng vẫn được đánh giá theo quy tắc yêu cầu hồ sơ.</div>}
  @if(unsupportedStorage){<div id="storage-form-warning" class="text-warning mt-2" role="alert">Giá trị cần kiểm tra: @(Model.OriginalStorageForm??value). Không tự thay thế dữ liệu cũ.
  @if(Model.Editing){<label class="form-check mt-2"><input class="form-check-input" type="checkbox" name="ReplaceUnsupportedStorage" value="true"/><span class="form-check-label">Tôi muốn thay giá trị cũ bằng lựa chọn trên khi lưu.</span></label>}
  </div>}
 }
-else if(field.Type=="checkbox"){<label class="form-check form-switch"><input type="checkbox" name="@field.Name" id="@field.Name" class="form-check-input" value="true" checked="@(value=="true")"/><input type="hidden" name="@field.Name" value="false"/><span class="form-check-label">Có</span></label>}
-else{<input type="@field.Type" name="@field.Name" id="@field.Name" value="@value" class="form-control" required="@required" maxlength="@field.Max" min="@(field.Type=="number"?"0":null)"/>}
-@Html.ValidationMessage(field.Name,null,new{@class="text-danger"})</div>}
+else if(field.Type=="checkbox"){<label class="form-check form-switch"><input type="checkbox" name="@field.Name" id="@field.Name" class="form-check-input" aria-describedby="@described" aria-invalid="@(invalid?"true":"false")" value="true" checked="@(value=="true")"/><input type="hidden" name="@field.Name" value="false"/><span class="form-check-label">Có</span></label>}
+else if(field.Name is "Notes" or "Description"){<textarea name="@field.Name" id="@field.Name" class="form-control" rows="4" maxlength="@field.Max" required="@required" aria-describedby="@described" aria-invalid="@(invalid?"true":"false")">@value</textarea>}
+else{<input aria-describedby="@described" aria-invalid="@(invalid?"true":"false")" type="@field.Type" name="@field.Name" id="@field.Name" value="@value" class="form-control" required="@required" maxlength="@field.Max" min="@(field.Type=="number"?"0":null)"/>}
+@if(!read&&hint!=null){<div id="@hintId" class="form-hint">@hint</div>}
+@Html.ValidationMessage(field.Name,null,new{@class="text-danger",id=errorId})</div>}
 </div>
 @if(Model.Entity is Vtb.Hr.Web.Data.Document attachmentDocument){
 <section class="mt-4" aria-label="Tệp đính kèm" data-attachment-editor><label class="form-label" for="Attachment">Tệp đính kèm</label>
@@ -36,18 +40,21 @@ else{<input type="@field.Type" name="@field.Name" id="@field.Name" value="@value
  <input type="hidden" name="RemoveAttachment" id="RemoveAttachment" value="false"/>
  <button class="btn btn-outline-danger btn-sm mb-2" type="button" data-remove-existing>Xóa tệp</button>
  <button class="btn btn-outline-secondary btn-sm mb-2" type="button" data-undo-remove hidden>Giữ lại tệp hiện có</button>
- <p class="text-warning" data-remove-status role="status" hidden>Tệp hiện có sẽ được xóa khi bạn nhấn Lưu dữ liệu. Chưa có thay đổi nào trên máy chủ.</p>
+ <p class="text-warning" data-remove-status role="status" hidden>Tệp hiện có sẽ được xóa khi bạn nhấn Lưu. Chưa có thay đổi nào trên máy chủ.</p>
  }
- <input type="file" class="form-control mt-2" id="Attachment" name="Attachment" accept=".pdf,.jpg,.jpeg,.png" aria-describedby="attachment-help attachment-error"/>
+ <input type="file" class="form-control mt-2" id="Attachment" name="Attachment" accept=".pdf,.jpg,.jpeg,.png" aria-describedby="attachment-help attachment-error Attachment-error" aria-invalid="@(ViewData.ModelState.TryGetValue("Attachment",out var attachmentState)&&attachmentState.Errors.Count>0?"true":"false")"/>
  <div id="attachment-help" class="form-hint">PDF, JPG, JPEG hoặc PNG, tối đa 10 MB. Chọn file mới để thay thế; không chọn file và không yêu cầu xóa sẽ giữ file hiện có.</div>
  <p class="text-danger mt-2" id="attachment-error" role="alert" hidden></p>
  <div class="mt-2" data-selected-file hidden><span class="text-break" data-file-name></span><button type="button" class="btn btn-outline-primary btn-sm ms-2" data-preview-file>Xem trước</button><button type="button" class="btn btn-outline-secondary btn-sm ms-2" data-clear-file>Bỏ tệp đã chọn</button></div>
  <div class="mt-3 border rounded p-2" data-preview-panel hidden><button class="btn btn-sm mb-2" type="button" data-close-preview>Đóng xem trước</button><div data-preview-content></div></div>
- @Html.ValidationMessage("Attachment",null,new{@class="text-danger"})
+ @Html.ValidationMessage("Attachment",null,new{@class="text-danger",id="Attachment-error"})
 }
 </section>}
-<div class="border-top mt-4 pt-3 text-end">@if(Model.Entity is Vtb.Hr.Web.Data.Qualification degree&&!string.IsNullOrEmpty(degree.EmployeeId)){<a class="btn" asp-controller="Profiles" asp-action="Details" asp-route-id="@degree.EmployeeId">Quay lại hồ sơ</a>}else if(Model.Entity is Vtb.Hr.Web.Data.Document document && !string.IsNullOrEmpty(document.EmployeeId)){<a class="btn" asp-controller="Profiles" asp-action="Details" asp-route-id="@document.EmployeeId">Quay lại hồ sơ</a>}else{<a class="btn" asp-controller="Catalog" asp-action="Index" asp-route-kind="@Model.Kind">Quay lại</a>}
-@if(!Model.ReadOnly||Model.Deleting){<button class="btn @(Model.Deleting?"btn-danger":"btn-primary") ms-2" type="submit">@(Model.Deleting?"Xác nhận xóa":"Lưu dữ liệu")</button>}</div>
+@if(Model.Kind=="documents"&&Model.ReadOnly&&!Model.Deleting&&Model.Entity is Vtb.Hr.Web.Data.Document systemDocument){
+<partial name="~/Views/Shared/_DocumentSystemInfo.cshtml" model="new DocumentSystemInfo(systemDocument.CreatedAt,systemDocument.UpdatedAt)"/>
+}
+<div class="border-top mt-4 pt-3 ui-form-actions">@if(NavigationContext.Return(Context.Request) is {} returnUrl){<a class="btn btn-outline-secondary" href="@returnUrl">@(!Model.ReadOnly||Model.Deleting?"Hủy":"Quay lại")</a>}else if(Model.Entity is Vtb.Hr.Web.Data.Qualification degree&&!string.IsNullOrEmpty(degree.EmployeeId)){<a class="btn btn-outline-secondary" asp-controller="Profiles" asp-action="Details" asp-route-id="@degree.EmployeeId">@(!Model.ReadOnly||Model.Deleting?"Hủy":"Quay lại hồ sơ")</a>}else if(Model.Entity is Vtb.Hr.Web.Data.Document document && !string.IsNullOrEmpty(document.EmployeeId)){<a class="btn btn-outline-secondary" asp-controller="Profiles" asp-action="Details" asp-route-id="@document.EmployeeId">@(!Model.ReadOnly||Model.Deleting?"Hủy":"Quay lại hồ sơ")</a>}else{<a class="btn btn-outline-secondary" asp-controller="Catalog" asp-action="Index" asp-route-kind="@Model.Kind">@(!Model.ReadOnly||Model.Deleting?"Hủy":"Quay lại danh sách")</a>}
+@if(!Model.ReadOnly||Model.Deleting){<button class="btn @(Model.Deleting?"btn-danger":"btn-primary")" type="submit">@(Model.Deleting?"Xác nhận xóa":"Lưu")</button>}</div>
 </form></div></div>
 
 

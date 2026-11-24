@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Vtb.Hr.Web.Data;
 using Vtb.Hr.Web.Models;
@@ -11,10 +11,15 @@ public partial class DashboardService {
  public IQueryable<DocumentQuality> ReportDocuments(ReportFilter f){var ids=ReportEmployees(f).Select(x=>x.EmployeeId);var q=db.DocumentQualities.AsNoTracking().Where(x=>ids.Contains(x.EmployeeId));if(f.TypeIds.Length+f.Groups.Length>0){var codes=ReportTypes(f).Select(x=>x.DocumentCode);q=q.Where(x=>codes.Contains(x.DocumentCode));}return q;}
  public IQueryable<DocumentRequirement> ReportRequirements(ReportFilter f){
   var q=db.DocumentRequirements.AsNoTracking();
-  // Only the document_id relationship is active. Without an external filter preserve NULL document_id rows.
-  if(f.HasScope){var employees=ReportEmployees(f).Select(x=>x.EmployeeId);var types=ReportTypes(f).Select(x=>x.DocumentTypeId);var docs=db.Documents.Where(x=>employees.Contains(x.EmployeeId));if(f.TypeIds.Length+f.Groups.Length>0)docs=docs.Where(x=>types.Contains(x.DocumentTypeId));var ids=docs.Select(x=>(int?)x.DocumentId);q=q.Where(x=>ids.Contains(x.DocumentId));}return q;
+  // Filter by employee/type, preserving requirements without a document_id.
+  var employees=EmployeeScope(f.Scope());
+  if(f.EmployeeIds.Length>0)employees=employees.Where(e=>f.EmployeeIds.Contains(e.EmployeeId));
+  var employeeIds=employees.Select(e=>e.EmployeeId);
+  q=q.Where(r=>employeeIds.Contains(r.EmployeeId));
+  if(f.TypeIds.Length+f.Groups.Length>0){var types=ReportTypes(f).Select(t=>t.DocumentTypeId);q=q.Where(r=>types.Contains(r.DocumentTypeId));}
+  return q;
  }
- public IQueryable<LaborContractCheck> ReportContracts(ReportFilter f){var ids=ReportEmployees(f).Select(x=>x.EmployeeId);return db.LaborContractChecks.AsNoTracking().Where(x=>ids.Contains(x.EmployeeId));}
+ public IQueryable<LaborContractCheck> ReportContracts(ReportFilter f){var ids=ReportEmployees(f).Select(x=>x.EmployeeId);return db.LaborContractChecks.AsNoTracking().Where(x=>ids.Contains(x.EmployeeId)&&(x.EmploymentStatus=="DangLamViec"||x.EmploymentStatus=="TamHoanHDLD"));}
  public IQueryable<ReportOrganizationRow> ProblemOrganizationQuery(ReportFilter f)=>
   from r in ReportRequirements(f)
   join e in db.Employees on r.EmployeeId equals e.EmployeeId
@@ -26,11 +31,20 @@ public partial class DashboardService {
    Missing=g.LongCount(x=>(x.EmploymentStatus=="DangLamViec"||x.EmploymentStatus=="TamHoanHDLD")&&x.RequirementStatus=="THIEU_HO_SO")};
  public async Task<ReportData> ProblemData(ReportFilter f,CancellationToken ct){
   var scope=ReportRequirements(f);var active=scope.Where(x=>x.EmploymentStatus=="DangLamViec"||x.EmploymentStatus=="TamHoanHDLD");
-  var total=await active.LongCountAsync(ct);var missing=await active.LongCountAsync(x=>x.RequirementStatus=="THIEU_HO_SO",ct);
+  long total,missing;
+  if(f.TypeIds.Length+f.Groups.Length==0){
+   var qualities=EmployeeMeasureScope(f.Scope());
+   if(f.EmployeeIds.Length>0)qualities=qualities.Where(e=>f.EmployeeIds.Contains(e.EmployeeId));
+   var summary=await qualities.GroupBy(e=>1).Select(g=>new{Total=g.Sum(e=>(long)e.TotalRequiredDocuments),Missing=g.Sum(e=>(long)e.TotalDocumentsMissing)}).SingleOrDefaultAsync(ct);
+   total=summary?.Total??0;missing=summary?.Missing??0;
+  }else{
+   // Employee totals cannot represent a type subset; count only SQL requirement rows for that subset.
+   total=await active.LongCountAsync(ct);missing=await active.LongCountAsync(x=>x.RequirementStatus=="THIEU_HO_SO",ct);
+  }
   var first=await active.Where(x=>x.RequirementStatus=="THIEU_HO_SO").GroupBy(x=>x.DocumentName).Select(g=>new{ Name=g.Key,Value=g.LongCount()}).OrderByDescending(x=>x.Value).ThenBy(x=>x.Name).ToListAsync(ct);
   var organization=await ProblemOrganizationQuery(f).ToListAsync(ct);
   var second=organization.GroupBy(x=>new{x.DivisionId,x.DivisionName}).Select(g=>new ReportPoint(g.Key.DivisionName,RequirementRate(g.Sum(x=>x.Total),g.Sum(x=>x.Missing)),g.Key.DivisionId.ToString())).OrderByDescending(x=>x.Value).ThenBy(x=>x.Name).ToList();
-  return new(new(){["total"]=DaxCount(total),["rate"]=RequirementRate(total,missing),["missing"]=DaxCount(missing)},first.Select(x=>new ReportPoint(x.Name,x.Value)).ToList(),second,organization);
+  return new(new(){["total"]=DaxCount(total),["rate"]=total==0?null:RequirementRate(total,missing),["missing"]=DaxCount(missing)},first.Select(x=>new ReportPoint(x.Name,x.Value)).ToList(),second,organization);
  }
  public IQueryable<ContractOrganizationRow> ContractOrganizationQuery(ReportFilter f)=>
   from c in ReportContracts(f)
@@ -49,15 +63,19 @@ public partial class DashboardService {
   return new(new(){["valid"]=DaxCount(valid),["missing"]=DaxCount(missing),["next"]=DaxCount(next),["expiring"]=DaxCount(expiring)},first,second.GroupBy(x=>ContractLabel(x.Code)).Select(g=>new ReportPoint(g.Key??"(Trống)",DaxCount(g.Sum(x=>x.Value)),g.Key==null?"BLANK":g.First().Code.ToUpperInvariant())).OrderByDescending(x=>x.Value).ToList(),ContractOrganization:organization);
  }
  public IQueryable<ReportRow> ReportTableQuery(ReportFilter f){
+  // Resolve display labels before building SQL; preserve translatable CASE and raw status predicates.
+  var workingLabel=Labels.Text("DangLamViec");var suspendedLabel=Labels.Text("TamHoanHDLD");var endedLabel=Labels.Text("ChamDutHDLD");var retiredLabel=Labels.Text("NghiHuu");
   IQueryable<ReportRow> q;
   if(f.Kind=="contractIssues"||f.Kind=="contractDetail"){
    var contracts=ReportContracts(f);
-   if(f.Kind=="contractIssues")contracts=contracts.Where(x=>x.LaborContractStatus!=null&&x.LaborContractStatus!="HOP_LE"&&x.LaborContractStatus!="KHONG_CANH_BAO");
+   if(f.Kind=="contractDetail"&&f.IssuesOnly)contracts=contracts.Where(x=>(x.LaborContractStatus=="CAN_KY_KET_TIEP"||x.LaborContractStatus=="THIEU_HDXDTH1")&&db.Employees.Any(e=>e.EmployeeId==x.EmployeeId&&e.DepartmentId==f.IssueDepartmentId));
+   else if(f.Kind=="contractIssues")contracts=contracts.Where(x=>x.LaborContractStatus!=null&&x.LaborContractStatus!="HOP_LE"&&x.LaborContractStatus!="KHONG_CANH_BAO");
    else if(f.State=="BLANK")contracts=contracts.Where(x=>x.LaborContractStatus!="HOP_LE"&&x.LaborContractStatus!="THIEU_HDXDTH1"&&x.LaborContractStatus!="CAN_KY_KET_TIEP"&&x.LaborContractStatus!="KHONG_CANH_BAO");
    else contracts=contracts.Where(x=>x.LaborContractStatus==f.State);
-   q=from c in contracts join e in db.Employees on c.EmployeeId equals e.EmployeeId select new ReportRow{Code=null,Document=null,Group=null,IssueDate=null,ExpiryDate=null,Days=null,Reason=null,Id=c.EmployeeId,Name=c.FullName,Department=c.DepartmentName,Employment=e.EmploymentStatus=="DangLamViec"?"Đang làm việc":e.EmploymentStatus=="TamHoanHDLD"?"Tạm hoãn HĐLĐ":e.EmploymentStatus=="ChamDutHDLD"?"Chấm dứt HĐLĐ":e.EmploymentStatus=="NghiHuu"?"Nghỉ hưu":"",Status=c.LaborContractStatus=="HOP_LE"?"Hợp lệ":c.LaborContractStatus=="THIEU_HDXDTH1"?"Thiếu HĐXĐTH1":c.LaborContractStatus=="CAN_KY_KET_TIEP"?"Cần ký kết tiếp":c.LaborContractStatus=="KHONG_CANH_BAO"?"Không cảnh báo":null};
+   q=from c in contracts join e in db.Employees on c.EmployeeId equals e.EmployeeId select new ReportRow{ContractStatusCode=c.LaborContractStatus,Code=null,Document=null,Group=null,IssueDate=null,ExpiryDate=null,Days=null,Reason=null,Id=c.EmployeeId,Name=c.FullName,Department=c.DepartmentName,Employment=e.EmploymentStatus=="DangLamViec"?workingLabel:e.EmploymentStatus=="TamHoanHDLD"?suspendedLabel:e.EmploymentStatus=="ChamDutHDLD"?endedLabel:e.EmploymentStatus=="NghiHuu"?retiredLabel:"",Status=c.LaborContractStatus=="HOP_LE"?"Hợp lệ":c.LaborContractStatus=="THIEU_HDXDTH1"?"Thiếu HĐXĐTH1":c.LaborContractStatus=="CAN_KY_KET_TIEP"?"Cần ký kết tiếp":c.LaborContractStatus=="KHONG_CANH_BAO"?"Không cảnh báo":null};
   }else{
-   var docs=ReportDocuments(f);
+   // Operational warning tables follow Rule 9; archived documents remain in the profile.
+   var docs=ReportDocuments(f).Where(x=>x.IsKpiScope==1);
    if(f.Kind=="problem")docs=docs.Where(x=>x.DocumentCode!="HDXDTH1"&&x.DocumentCode!="HDXDTH2"&&x.DocumentCode!="HDTHUVIEC"&&(x.QualityStatus=="KHONG_HOP_LE"||x.QualityStatus=="DA_HET_HAN"));
    else if(f.Kind=="expiring")docs=docs.Where(x=>x.QualityStatus=="SAP_HET_HAN");
    else docs=docs.Where(x=>x.QualityStatus=="DA_HET_HAN"&&(x.DocumentCode=="HDKXDTH"||x.DocumentCode=="HDTHUVIEC"||x.DocumentCode=="HDXDTH1"||x.DocumentCode=="HDXDTH2"));
@@ -66,7 +84,12 @@ public partial class DashboardService {
   }
   q=q.Distinct();if(!string.IsNullOrWhiteSpace(f.Search)){var term=f.Search.Trim();q=q.Where(x=>x.Id.Contains(term)||x.Name.Contains(term)||(x.Document!=null&&x.Document.Contains(term))||(x.Department!=null&&x.Department.Contains(term)));}return q;
  }
+ public async Task ValidateContractDrill(ReportFilter f,CancellationToken ct){
+  if(!f.IssuesOnly)return;
+  if(!f.IssueDepartmentId.HasValue||!await db.Departments.AnyAsync(d=>d.DepartmentId==f.IssueDepartmentId&&(f.DivisionIds.Length==0||f.DivisionIds.Contains(d.DivisionId))&&(f.DepartmentIds.Length==0||f.DepartmentIds.Contains(d.DepartmentId)),ct))throw new InvalidDataException("Phòng ban không tồn tại hoặc ngoài bộ lọc hợp đồng.");
+ }
  public async Task<ReportTable> ReportRows(ReportFilter f,CancellationToken ct){
+  await ValidateContractDrill(f,ct);
   var q=ReportTableQuery(f);var total=await q.CountAsync(ct);var page=Math.Min(f.Page,Math.Max(1,(int)Math.Ceiling(total/(double)f.PageSize)));
   return new(await ReportOrderQuery(f).Skip((page-1)*f.PageSize).Take(f.PageSize).ToListAsync(ct),total,page,f.PageSize);
  }

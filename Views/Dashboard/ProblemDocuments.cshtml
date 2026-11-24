@@ -1,29 +1,46 @@
-﻿@{ViewData["Title"]="Chất lượng hồ sơ";}
+@{ViewData["Title"]="Chất lượng hồ sơ";}
 <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true"/>
 <link rel="stylesheet" href="~/css/reports.css" asp-append-version="true"/>
 <section class="secondary-report" id="secondary-report" data-report="problem" data-api="@Url.Action("ProblemData")" data-options="@Url.Action("ReportOptions")" data-table="@Url.Action("ReportTable")">
-<h1 class="page-title mb-2">Theo dõi chất lượng dữ liệu hồ sơ</h1><p class="text-secondary">Phân tích các vấn đề chất lượng dữ liệu theo loại hồ sơ, phòng ban và nguyên nhân (Không bao gồm HĐLĐ).</p><partial name="_ReportTabs"/>
+<h1 class="page-title mb-2">Theo dõi chất lượng dữ liệu hồ sơ</h1><partial name="_ReportTabs"/>
 <partial name="_ReportFilters" model='@("problem")'/>
 <div id="report-error" class="alert alert-danger" hidden role="alert"></div><div id="report-status" class="text-secondary mb-3" role="status"></div>
 <div class="dashboard-kpi-grid report-kpis">
 @foreach(var k in new[]{("total","Tổng yêu cầu hồ sơ","total"),("rate","Tỷ lệ đáp ứng hồ sơ","complete"),("missing","Hồ sơ đang thiếu","missing")}){<div class="dashboard-kpi-card"><div class="dashboard-kpi-label">@k.Item2</div><div class="dashboard-kpi-value dashboard-kpi-value--@k.Item3" data-report-kpi="@k.Item1">—</div></div>}
 </div>
 <div class="report-charts-grid">
-<div class="card report-chart-card"><div class="card-header"><h2 class="card-title">Hồ sơ đang thiếu theo loại tài liệu</h2></div><div class="dashboard-chart-viewport" tabindex="0" role="region" aria-label="Hồ sơ đang thiếu theo loại tài liệu"><div id="report-chart-first" class="overview-chart" role="img" aria-label="Hồ sơ đang thiếu theo loại tài liệu"></div></div></div>
-<div class="card report-chart-card"><div class="card-header"><h2 class="card-title" id="problem-org-title">Tỷ lệ đáp ứng hồ sơ theo đơn vị</h2></div><div class="dashboard-chart-viewport" tabindex="0" role="region" aria-label="Tỷ lệ đáp ứng hồ sơ theo phòng ban"><div class="problem-org-controls"><div class="problem-org-modes" role="group" aria-label="Chế độ tỷ lệ đáp ứng">
-<button type="button" class="btn btn-sm active" id="problem-mode-division" aria-pressed="true">Theo đơn vị</button>
-<button type="button" class="btn btn-sm" id="problem-mode-all" aria-pressed="false">Tất cả phòng ban</button>
-<button type="button" class="btn btn-sm" id="problem-mode-detail" aria-pressed="false">Chi tiết đơn vị</button>
-</div><label id="problem-division-label" hidden>Đơn vị <select id="problem-division" class="form-select form-select-sm" aria-label="Chọn đơn vị để xem phòng ban"></select></label><span id="problem-org-path" role="status">Theo đơn vị · Nhấn thanh để xem phòng ban</span><button id="problem-org-back" type="button" class="btn btn-sm" hidden>Quay lại theo đơn vị</button></div><div id="report-chart-second" class="overview-chart" role="img" aria-label="Tỷ lệ đáp ứng hồ sơ theo phòng ban"></div></div></div>
+@foreach(var chart in new[]{("first","Hồ sơ đang thiếu theo loại tài liệu"),("second","Tỷ lệ đáp ứng hồ sơ theo phòng ban")}){
+<div class="card report-chart-card @(chart.Item1=="second"?"requirement-rate-card":"")"><div class="card-header d-block"><div class="chart-drill-toolbar"><h2 class="card-title" id="requirement-@chart.Item1-title">@chart.Item2</h2></div>
+<div id="requirement-@chart.Item1-error" class="text-danger small" role="alert" hidden></div>
 </div>
+<div class="chart-controls">
+@if(chart.Item1=="second"){
+<div class="chart-mode-buttons" role="group" aria-label="Chế độ tỷ lệ đáp ứng hồ sơ"><button type="button" class="btn btn-sm btn-primary" data-rate-mode="all" aria-pressed="true">Tất cả phòng ban</button><button type="button" class="btn btn-sm" data-rate-mode="division" aria-pressed="false">Theo khối</button><button type="button" class="btn btn-sm" data-rate-mode="detail" aria-pressed="false">Chi tiết khối</button></div><label class="visually-hidden" for="requirement-division">Chọn khối</label><select id="requirement-division" class="form-select" hidden disabled></select>
+}
+<button id="requirement-@chart.Item1-back" type="button" class="btn btn-sm btn-outline-secondary chart-drill-back" hidden><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M5 12l6 6M5 12l6 -6"/></svg><span>Quay lại</span></button></div>
+<div class="dashboard-chart-viewport"><div id="report-chart-@chart.Item1" class="overview-chart" role="img" aria-label="@chart.Item2"></div></div>
+<details class="px-3 pb-2"><summary class="text-secondary small">Dữ liệu biểu đồ</summary><div id="requirement-@chart.Item1-options" class="d-flex flex-wrap gap-2 mt-2" aria-label="Chọn dữ liệu biểu đồ bằng bàn phím"></div></details></div>
+}
+</div>
+<dialog id="requirement-detail" class="requirement-detail" aria-labelledby="requirement-detail-title">
+<div class="d-flex justify-content-between align-items-center gap-3 mb-3"><h2 class="h3 m-0" id="requirement-detail-title">Cán bộ thiếu tài liệu</h2><button type="button" class="btn btn-sm" id="requirement-close">Quay lại biểu đồ</button></div>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3" id="requirement-tools"><form id="requirement-search" class="d-flex gap-2"><input class="form-control" type="search" maxlength="100" placeholder="Mã, họ tên, phòng ban" aria-label="Tìm cán bộ thiếu tài liệu"/><button class="btn btn-primary" type="submit">Tìm</button></form></div>
+<p id="requirement-summary" role="status"></p><p id="requirement-detail-error" class="text-danger" role="alert" hidden></p>
+<div class="table-responsive"><table class="table table-vcenter"><thead><tr>
+@foreach(var col in new[]{("id","Mã cán bộ"),("name","Họ tên"),("department","Phòng ban"),("missing","Số yêu cầu thiếu")}){<th><button type="button" class="table-sort-button" data-requirement-sort="@col.Item1">@col.Item2</button></th>}<th>Tài liệu cần bổ sung</th>
+</tr></thead><tbody id="requirement-people"></tbody></table></div>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2"><label>Số dòng <select id="requirement-size" class="form-select form-select-sm"><option>20</option><option>50</option><option>100</option></select></label><div><button id="requirement-prev" type="button" class="btn btn-sm">Trước</button><button id="requirement-next" type="button" class="btn btn-sm">Sau</button></div></div>
+</dialog>
 <section class="card problem-table-tabs" aria-labelledby="problem-tables-title">
-<div class="card-header"><h2 class="card-title" id="problem-tables-title">Danh sách hồ sơ cần theo dõi</h2></div>
+<div class="card-header d-block"><h2 class="card-title" id="problem-tables-title">Danh sách hồ sơ cần theo dõi</h2></div>
 <div class="nav nav-tabs px-3" role="tablist" aria-label="Danh sách hồ sơ">
 <button type="button" class="nav-link active" id="problem-tab" role="tab" aria-selected="true" aria-controls="problem-panel">Tài liệu có vấn đề</button>
 <button type="button" class="nav-link" id="expiring-tab" role="tab" aria-selected="false" aria-controls="expiring-panel" tabindex="-1">Tài liệu sắp hết hạn</button>
 </div>
 <div id="problem-panel" role="tabpanel" aria-labelledby="problem-tab"><partial name="_ReportTables" model='@("problemTable")'/></div>
-<div id="expiring-panel" role="tabpanel" aria-labelledby="expiring-tab" hidden><partial name="_ReportTables" model='@("expiring")'/></div>
+    <div id="expiring-panel" role="tabpanel" aria-labelledby="expiring-tab" hidden>
+        <partial name="_ReportTables" model='@("expiring")' />
+    </div>
 </section>
 
 </section>

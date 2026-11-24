@@ -38,6 +38,6 @@
  });
  removeButton?.addEventListener('click',()=>{if(window.confirm('Xóa tệp hiện có khi lưu dữ liệu? Bản ghi tài liệu vẫn được giữ lại.')){clear();removal(true);}});
  undo?.addEventListener('click',()=>removal(false));
- input.form.addEventListener('submit',event=>{if(checking){event.preventDefault();fail('Đang kiểm tra tệp, vui lòng chờ rồi nhấn Lưu dữ liệu.');}else input.setCustomValidity('');});
+ input.form.addEventListener('submit',event=>{if(checking){event.preventDefault();fail('Đang kiểm tra tệp, vui lòng chờ rồi nhấn Lưu.');}else input.setCustomValidity('');});
  window.addEventListener('pagehide',closePreview);
 })();

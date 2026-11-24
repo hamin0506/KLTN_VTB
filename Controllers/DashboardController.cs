@@ -24,9 +24,11 @@ public class DashboardController(DashboardService service,ILogger<DashboardContr
  }
   [HttpGet]public IActionResult DocumentDetails([FromQuery]DocumentDrillFilter filter){if(!ModelState.IsValid)return BadRequest("Trạng thái hoặc bộ lọc không hợp lệ.");return View(filter);}
  [HttpGet]public Task<IActionResult> DocumentDetailsData([FromQuery]DocumentDrillFilter filter,CancellationToken ct)=>Read(filter.Scope(),()=>service.DocumentDetails(filter,ct));
+ [HttpGet]public Task<IActionResult> RequirementChart([FromQuery]RequirementDrillFilter f,CancellationToken ct)=>Read(f.Scope(),async()=>{await service.ValidateRequirementDrill(f,ct);return await service.RequirementChart(f,ct);});
+ [HttpGet]public Task<IActionResult> RequirementPeople([FromQuery]RequirementDrillFilter f,CancellationToken ct)=>Read(f.Scope(),async()=>{await service.ValidateRequirementDrill(f,ct);return await service.RequirementPeople(f,ct);});
  [HttpGet]public IActionResult ProblemDocuments()=>View();
  [HttpGet]public IActionResult Contract()=>View();
- [HttpGet]public IActionResult ContractDetails([FromQuery]ReportFilter filter){if(!ModelState.IsValid||filter.State==null)return BadRequest("Chọn trạng thái hợp đồng hợp lệ.");return View(filter);}
+ [HttpGet]public IActionResult ContractDetails([FromQuery]ReportFilter filter){if(!ModelState.IsValid||(filter.State==null&&!filter.IssuesOnly))return BadRequest("Chọn trạng thái hợp đồng hợp lệ.");return View(filter);}
  [HttpGet]public Task<IActionResult> ProblemData([FromQuery]ReportFilter filter,CancellationToken ct)=>Read(filter.Scope(),()=>service.ProblemData(filter,ct));
  [HttpGet]public Task<IActionResult> ContractData([FromQuery]ReportFilter filter,CancellationToken ct)=>Read(filter.Scope(),()=>service.ContractData(filter,ct));
  [HttpGet]public Task<IActionResult> ReportOptions([FromQuery]ReportFilter filter,CancellationToken ct)=>Read(filter.Scope(),()=>service.ReportOptions(filter,ct));
@@ -39,6 +41,7 @@ public class DashboardController(DashboardService service,ILogger<DashboardContr
    logger.LogDebug("Dashboard request canceled by client: {TraceId}",HttpContext.TraceIdentifier);
    return StatusCode(499);
   }
+  catch(InvalidDataException e){return BadRequest(new{message=e.Message});}
   catch(SqlException e){logger.LogError(e,"Executive Overview SQL read failed");return StatusCode(503,new{message="Không thể đọc dữ liệu VTB2. Kiểm tra kết nối SQL Server và quyền truy cập.",traceId=HttpContext.TraceIdentifier});}
   catch(InvalidOperationException e) when(e.Message.Contains("No database provider")){return StatusCode(503,new{message="Chưa cấu hình kết nối database."});}
  }

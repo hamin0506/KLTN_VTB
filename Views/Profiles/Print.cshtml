@@ -1,4 +1,4 @@
-﻿@model ProfileModel
+@model ProfileModel
 @using Vtb.Hr.Web.Services
 @{
  Layout=null; var e=Model.Employee;
@@ -25,7 +25,7 @@
 <tr><td>Số tài liệu sắp hết hạn</td><td>@ProfilePresentation.CurrentCount(Model,"SAP_HET_HAN")</td></tr>
 <tr><td>Số tài liệu đã hết hạn</td><td>@ProfilePresentation.CurrentCount(Model,"DA_HET_HAN")</td></tr>
 <tr><td>Số tài liệu không hợp lệ</td><td>@ProfilePresentation.CurrentCount(Model,"KHONG_HOP_LE")</td></tr>
-<tr><td>Tình trạng hồ sơ hiện tại</td><td>@(string.IsNullOrWhiteSpace(Model.Quality?.EmployeeQualityStatus)?"--":Labels.Text(Model.Quality.EmployeeQualityStatus))</td></tr>
+<tr><td>Tình trạng hồ sơ hiện tại</td><td>@EmployeeQualityIndicators.FromQuality(Model.Quality).Label</td></tr>
 <tr><td>Cảnh báo hiện tại</td><td>@Result(Model.Quality?.QualityIssue)</td></tr>
 </tbody></table>
 <footer class="confirmation"><p class="confirmation-date">Hà Nội, ngày @printedAt.Day tháng @printedAt.Month năm @printedAt.Year</p><div class="signatures"><div><strong>NGƯỜI LẬP</strong><p>(Ký, ghi rõ họ tên)</p></div><div><strong>CÁN BỘ XÁC NHẬN</strong><p>(Ký, ghi rõ họ tên)</p></div></div></footer>

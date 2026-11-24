@@ -1,3 +1,6 @@
-@model Vtb.Hr.Web.Data.Division
-@{ViewData["Title"]="Chi tiết đơn vị";}
-<h1 class="page-title mb-4">@Model.DivisionName</h1><div class="card"><div class="card-body"><dl class="row"><dt class="col-sm-3">Mã định danh</dt><dd class="col-sm-9">@Model.DivisionId</dd><dt class="col-sm-3">Mã đơn vị</dt><dd class="col-sm-9">@Model.DivisionCode</dd><dt class="col-sm-3">Tên đơn vị</dt><dd class="col-sm-9">@Model.DivisionName</dd></dl></div><div class="card-footer"><a class="btn" asp-action="Index">Quay lại</a> <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.DivisionId">Chỉnh sửa</a></div></div>
+﻿@model Vtb.Hr.Web.Data.Division
+@using Vtb.Hr.Web.Security
+@using Vtb.Hr.Web.Services
+@inject IConfiguration Config
+@{var admin=Access.Admin(User,Config);ViewData["Title"]="Chi tiết khối";}
+<h1 class="page-title mb-4">@Model.DivisionName</h1><div class="card"><div class="card-body"><dl class="row"><dt class="col-sm-3">Mã định danh</dt><dd class="col-sm-9">@Model.DivisionId</dd><dt class="col-sm-3">Mã khối</dt><dd class="col-sm-9">@Model.DivisionCode</dd><dt class="col-sm-3">Tên khối</dt><dd class="col-sm-9">@Model.DivisionName</dd></dl></div><div class="card-footer"><a class="btn" href="@(NavigationContext.Return(Context.Request)??Url.Action("Index"))">@(NavigationContext.Return(Context.Request)!=null?"Quay lại":"Quay lại danh sách khối")</a> @if(admin){<a class="btn btn-primary" asp-action="Edit" asp-route-returnUrl="@NavigationContext.OrganizationReturn(Context.Request, "Divisions")" asp-route-id="@Model.DivisionId">Chỉnh sửa</a>}</div></div>

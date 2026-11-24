@@ -5,9 +5,68 @@
 #app-sidebar>.sidebar-brand-layout{display:flex;flex-direction:column;align-items:stretch;width:100%;padding:0}#app-sidebar .sidebar-toolbar{display:flex;flex:0 0 auto;justify-content:flex-end;align-items:center;width:100%;padding:8px 10px 0;margin:0}#app-sidebar .app-brand{flex:0 0 auto;align-self:center}#app-sidebar .navbar-collapse{width:100%}#sidebar-toggle{color:#cce3f5;background:transparent;border-color:transparent;box-shadow:none;width:36px;height:36px}#sidebar-toggle:hover{background:#ffffff15;color:white}#sidebar-toggle .menu-icon{width:22px;height:22px;margin:0}#sidebar-mobile-toggle{display:none}#sidebar-mobile-toggle .menu-icon{margin:0}.navbar-vertical.navbar-expand-lg .app-brand{padding-top:8px}
 @media(min-width:992px){html.sidebar-compact #app-sidebar .sidebar-toolbar{justify-content:flex-end;padding:8px 10px 0}html.sidebar-compact #app-sidebar .app-brand{padding-top:12px}}
 @media(max-width:991.98px){#sidebar-mobile-toggle{display:inline-flex}#app-sidebar .sidebar-toolbar{display:flex}#sidebar-toggle{display:none}}
-.employee-table-scroll{max-width:100%;isolation:isolate}.employee-table{width:100%;min-width:1160px;table-layout:fixed}.employee-table :is(th,td){padding:12px 10px;min-width:0;max-width:none;white-space:normal;word-break:normal;overflow-wrap:break-word;line-height:1.5;border-bottom:1px solid #e6ebf1}.employee-table th{letter-spacing:0;background:#f3f6fa}.employee-code-col{width:110px}.employee-name-col{width:180px}.employee-phone-col{width:125px}.employee-email-col{width:250px}.employee-gender-col{width:70px}.employee-department-col{width:auto}.employee-action-col{width:210px}.employee-table :is(th,td):nth-child(5){text-align:center}.employee-table td:nth-child(1),.employee-table td:nth-child(3){white-space:nowrap}.employee-table td:nth-child(4){overflow-wrap:anywhere}.employee-table .badge{white-space:normal;line-height:1.4;max-width:100%}.employee-table tbody tr{--employee-row-bg:#fff}.employee-table tbody tr:hover{--employee-row-bg:#f1f6fc}.employee-table tbody td{background:var(--employee-row-bg)}.employee-table .employee-actions-cell{position:sticky;right:0;z-index:1;box-shadow:-3px 0 5px #10243d10}.employee-table th.employee-actions-cell{z-index:2;background:#f3f6fa}.employee-actions{flex-wrap:nowrap;gap:12px!important;align-items:center}.employee-action{display:inline-block;white-space:nowrap;padding:4px 0;text-decoration:none}.employee-action:hover{text-decoration:underline}
+/* Personnel directory only: nine columns, horizontal scrolling within the card. */
+.employee-results-card{min-width:0;overflow:hidden}
+.employee-results-card>.card-header{padding:12px 16px;gap:12px}
+.employee-results-card>.employee-quality-legend{padding:8px 16px;border-bottom:1px solid #e6ebf1}
+.employee-results-card .export-header-actions{gap:12px}
+.employee-table-scroll{width:100%;max-width:100%;min-width:0;overflow-x:auto;isolation:isolate}
+.employee-table{width:100%;min-width:1080px;table-layout:auto}
+.employee-table :is(th,td){padding:10px 8px;min-width:0;max-width:none;white-space:normal;word-break:normal;overflow-wrap:break-word;line-height:1.5;vertical-align:middle;border-bottom:1px solid #e6ebf1}
+.employee-table th{font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;color:#42566e;background:#f3f6fa}
+.employee-table td{font-size:14px;color:#182433}
+.employee-code-col{width:120px}.employee-name-col{width:14%}.employee-phone-col{width:104px}.employee-email-col{width:17%}.employee-gender-col{width:60px}.employee-department-col{width:16%}.employee-position-col{width:11%}.employee-status-col{width:118px}.employee-action-col{width:1%}
+.employee-table td:nth-child(2){font-weight:600;min-width:130px}
+.employee-table td:nth-child(4){min-width:155px}
+.employee-table td:nth-child(6){min-width:135px}
+.employee-table td:nth-child(7){min-width:100px}
+.employee-table .table-row-actions{gap:10px}
+.employee-table .employee-actions-cell{white-space:nowrap;width:1%}
+.employee-table :is(th,td):nth-child(5){text-align:center}
+.employee-table td:nth-child(3){white-space:nowrap;font-variant-numeric:tabular-nums}
+.employee-table td:nth-child(4){overflow-wrap:anywhere;user-select:text}
+.employee-table .employee-quality-link{color:#206bc4;font-weight:600;text-decoration:none}
+.employee-table .employee-quality-link:hover{text-decoration:underline}
+.employee-quality-caption{display:flex;align-items:center;gap:6px;margin-top:3px;color:#52667b;font-size:13px;line-height:1.4;white-space:nowrap}
+.employee-table .employee-department-text{display:block;white-space:normal;overflow:visible;max-height:none;word-break:normal;overflow-wrap:break-word}
+.employee-table .employee-employment-badge{white-space:normal;line-height:1.4;font-size:12px;padding:4px 6px;font-weight:500;max-width:100%;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0}
+/* Employment badges are independent of document quality indicators. */
+.employee-table .employee-employment--DangLamViec{background:#ecfdf5;color:#047857;border-color:#d1fae5}
+.employee-table .employee-employment--TamHoanHDLD{background:#fff7ed;color:#9a3412;border-color:#ffedd5}
+.employee-table .employee-employment--ChamDutHDLD{background:#edf3f8;color:#405b73;border-color:#dce6ef}
+.employee-table .employee-employment--NghiHuu{background:#f3f4f6;color:#4b5563;border-color:#e5e7eb}
+.employee-table tbody tr{--employee-row-bg:#fff}
+.employee-table tbody tr:hover{--employee-row-bg:#f0f7ff}
+.employee-table tbody td{background:var(--employee-row-bg)}
+.employee-table .employee-actions-cell{position:sticky;right:0;z-index:2;background:var(--employee-row-bg,#fff);border-left:0;box-shadow:none}
+.employee-table th.employee-actions-cell{z-index:3;background:#f3f6fa}
 
-.employee-department-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;line-height:1.5;max-height:3em}
+@media(max-width:767.98px){
+ .employee-results-card>.card-header{padding:12px 16px}
+ .employee-results-card>.employee-quality-legend{padding:8px 16px}
+
+}
+
+/* Narrow/zoomed view: same nine cells, no duplicate records or hidden contact fields. */
+@media(max-width:799.98px){
+ .employee-table-scroll{overflow:visible}
+ .employee-table{display:block;width:100%;min-width:0;table-layout:auto}
+ .employee-table colgroup{display:none}
+ .employee-table thead{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ .employee-table tbody{display:grid;gap:12px;padding:12px}
+ .employee-table tbody tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid #dbe3ed;border-radius:8px;overflow:hidden}
+ .employee-table tbody td{display:block;min-width:0;width:auto;max-width:none;padding:10px 12px;text-align:left;white-space:normal;border:0;overflow-wrap:anywhere}
+ .employee-table tbody td:nth-child(n){min-width:0;width:auto}
+ .employee-table tbody td::before{content:attr(data-label);display:block;color:#52667b;font-size:12px;font-weight:600;margin-bottom:4px}
+ .employee-table tbody td:nth-child(4),.employee-table tbody .employee-actions-cell{grid-column:1/-1}
+ .employee-table tbody td:nth-child(3){white-space:nowrap}
+ .employee-table tbody .employee-actions-cell{position:static;box-shadow:none;border-top:1px solid #e6ebf1;background:#f8fafc}
+
+}
+@media(max-width:479.98px){
+ .employee-table tbody tr{grid-template-columns:minmax(0,1fr)}
+
+}
 
 /* Sidebar menu rhythm: one icon column, no separate footer area. */
 #app-sidebar>.sidebar-brand-layout{justify-content:flex-start}
@@ -28,3 +87,4 @@
  html.sidebar-compact #app-sidebar .nav-group{margin:0}
  html.sidebar-compact #app-sidebar .brand-logo-surface{width:58px;padding:3px}
 }
+

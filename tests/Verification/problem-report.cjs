@@ -1,25 +1,43 @@
-// Exercise the real module; fixtures never enter VTB2.
-const vm=require('vm'),fs=require('fs'),assert=require('assert');
-const nodes=new Map();function node(id){if(!nodes.has(id))nodes.set(id,{hidden:false,events:{},children:[],style:{},classList:{toggle(){}},setAttribute(k,v){this[k]=v},addEventListener(k,f){this.events[k]=f},focus(){},textContent:'',replaceChildren(){this.children=[]},append(x){this.children.push(x)}});return nodes.get(id);}
-const grid={columns:'510px 510px'};
-function chart(controls){const card={querySelector(s){return s==='.card-header'?{offsetHeight:64}:controls?{offsetHeight:100}:null;}};return {dom:{style:{},parentElement:{clientWidth:510},closest(s){return s==='.report-chart-card'?card:grid}},getDom(){return this.dom},resize(){},setOption(o){this.option=o},on(k,f){this[k]=f}};}
-const ctx={window:{},document:{getElementById:node,createElement:()=>({})},getComputedStyle:el=>el===grid?{gridTemplateColumns:grid.columns}:{fontFamily:'Inter, sans-serif'},Intl,Map};vm.createContext(ctx);vm.runInContext(fs.readFileSync('wwwroot/js/problem-report.js','utf8'),ctx);
-const api=ctx.window.ProblemReport,a=chart(false),b=chart(true);api.init([a,b]);
-const data={first:Array.from({length:35},(_,i)=>({name:'Tên tài liệu tiếng Việt đầy đủ '+i,value:i})),organization:[{divisionId:1,divisionName:'Khối một',departmentId:11,departmentName:'Phòng trùng tên',total:1,missing:1},{divisionId:1,divisionName:'Khối một',departmentId:12,departmentName:'Phòng hai',total:99,missing:0},{divisionId:2,divisionName:'Khối hai',departmentId:21,departmentName:'Phòng trùng tên',total:2,missing:1}]};
-const labelNames=()=>b.option.yAxis.data.map(k=>b.option.yAxis.axisLabel.formatter(k).replace(/\n/g,' '));
-const equalCards=()=>assert.equal(parseInt(a.dom.style.height)+66,parseInt(b.dom.style.height)+166);
-api.setData(data);equalCards();assert.equal(a.option.series[0].data.length,35);assert.equal(a.option.series[0].data[0].value,0);assert.equal(a.option.dataZoom,undefined);assert.equal(a.option.series[0].barWidth,12);
-assert.equal(b.option.series[0].data[0].value,.99);assert.equal(b.option.yAxis.data.length,2);
-for(const key of ['fontFamily','fontSize','fontWeight','color','margin'])assert.equal(a.option.yAxis.axisLabel[key],b.option.yAxis.axisLabel[key]);assert.equal(a.option.xAxis.axisLabel.fontSize,12);assert.equal(b.option.tooltip.textStyle.fontSize,13);
-node('problem-mode-all').events.click();assert.equal(b.option.yAxis.data.length,3);assert.equal(new Set(b.option.yAxis.data).size,3);assert.equal(labelNames().filter(n=>n==='Phòng trùng tên').length,2);equalCards();
-const index=b.option.yAxis.data.indexOf('21');const tooltip=b.option.tooltip.formatter([{dataIndex:index}]);assert(tooltip.includes('Phòng trùng tên')&&tooltip.includes('Khối hai')&&tooltip.includes('50,00%'));
-api.setData(data);assert.equal(b.option.yAxis.data.length,3); // retain all mode across filtering
-node('problem-mode-detail').events.click();assert.equal(b.option.title.text,'Chọn đơn vị để xem phòng ban');
-node('problem-division').events.change({target:{value:'2'}});assert.deepEqual([...b.option.yAxis.data],['21']);assert(!node('problem-org-back').hidden);equalCards();
-node('problem-org-back').events.click();assert(labelNames().includes('Khối một'));
-b.click({data:{code:1}});assert.equal(b.option.yAxis.data.length,2);assert(labelNames().includes('Phòng hai'));assert.equal(node('problem-mode-detail')['aria-pressed'],'true');
-api.setData({...data,organization:[data.organization[2]]});assert.equal(labelNames()[0],'Khối hai');assert(node('problem-org-back').hidden);
-node('expiring-tab').events.click();assert(node('problem-panel').hidden);assert(!node('expiring-panel').hidden);node('problem-tab').events.click();assert(!node('problem-panel').hidden);assert(node('expiring-panel').hidden);
-for(const width of [1920,1440,1366,1024,768,390]){a.dom.parentElement.clientWidth=width;b.dom.parentElement.clientWidth=width;grid.columns=width>=1024?'510px 510px':'390px';api.resize();assert.equal(a.option.yAxis.data.length,35);assert.equal(a.dom.style.minWidth,'0');if(width>=1024)equalCards();}
-api.clear();a.option=null;a.dom.parentElement.clientWidth=500;api.resize();assert.equal(a.option,null);assert.equal(api.rate(0,0),0);
-console.log('PASS equal card heights including controls; shared fonts; three modes, duplicate names by ID, full tooltip, weighted rate, drill/back/filter scope, tabs and resize. Mock DOM only.');
+// Real module, simulated DOM/API. No SQL or personnel data.
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const nodes=new Map();
+function node(id){assert(!/^requirement-(first|second)-path$/.test(id),'Removed subtitle must not be rendered');if(!nodes.has(id)){const n={id,style:{},dataset:{},events:{},children:[],options:[],textContent:'',hidden:false,open:false,value:'',classList:{toggle(){}},setAttribute(k,v){this[k]=v;},addEventListener(k,f){this.events[k]=f;},replaceChildren(){this.children=[];if(id==='requirement-division')this.options=[];},append(...x){this.children.push(...x);if(id==='requirement-division'){this.options.push(...x);if(!this.value)this.value=x[0].value;}},insertRow(){const x=node('row'+Math.random());this.append(x);return x;},insertCell(){const x=node('cell'+Math.random());this.append(x);return x;},querySelector(){return node(id+' input');},click(){this.events.click?.();},focus(){},showModal(){this.open=true;},close(){if(this.open){this.open=false;this.events.close?.();}}};nodes.set(id,n);}return nodes.get(id);}
+const document={getElementById:node,createElement:tag=>node(tag+Math.random()),querySelector:s=>node(s),querySelectorAll:s=>s==='[data-rate-mode]'?['all','division','detail'].map(mode=>{const b=node('mode-'+mode);b.dataset.rateMode=mode;return b;}):[]};
+function chart(){return {dom:{style:{}},getDom(){return this.dom;},resize(){},setOption(o){this.option=o;},on(k,f){assert(!this[k]);this[k]=f;},showLoading(){},hideLoading(){},clear(){this.option=null;}};}
+const a=chart(),b=chart(),location={pathname:'/Dashboard/ProblemDocuments',search:''};let query=new URLSearchParams(),requests=[],exportParams,hold=null;
+const point=(id,name,total,missing,employees)=>({id,name,total,missing,employees,rate:total?(total-missing)/total:null});
+async function get(url,p,signal){requests.push({url,p:new URLSearchParams(p),signal});if(hold&&url.includes('RequirementChart')&&(p.get('DrillTypeId')==='101'||p.get('DrillDivisionId')==='1')){const h=hold;hold=null;return h;}
+ if(url.includes('RequirementPeople'))return {rows:(p.get('Search')||p.get('DrillDepartmentId')==='12')?[ ]:[{employeeId:'TEST0001',fullName:'Test',department:'Phòng',missing:1,documents:['Tài liệu thử']}],total:(p.get('Search')||p.get('DrillDepartmentId')==='12')?0:1,missing:(p.get('Search')||p.get('DrillDepartmentId')==='12')?0:1,page:1,pageSize:20};
+ if(p.get('Level')==='types')return [point(101,'Tên trùng',2,1,1),point(102,'Tên trùng',3,2,2)];
+ if(p.get('Level')==='divisions')return [point(1,'Khối A',100,1,1),point(2,'Khối B',2,1,1)];
+ if(!p.has('DrillDivisionId'))return [point(11,'Phòng trùng',1,1,1),point(12,'Phòng đủ',99,0,0),point(21,'Phòng trùng',2,1,1)];
+ return p.get('DrillDivisionId')==='1'?[point(11,'Phòng trùng',1,1,1),point(12,'Phòng đủ',99,0,0)]:[point(21,'Phòng trùng',2,1,1)];}
+const context={window:{addEventListener(){},ExcelDownload:{button(el,url,fn){exportParams=fn;},total(){}}},document,URLSearchParams,AbortController,Intl,Map,location,history:{replaceState(_,__,url){location.search=url.slice(url.indexOf('?'));}}};vm.createContext(context);vm.runInContext(fs.readFileSync('wwwroot/js/problem-report.js','utf8'),context);const api=context.window.ProblemReport;const tick=()=>new Promise(r=>setImmediate(r));
+(async()=>{
+ node('[name="DivisionIds"]').options=[{value:'1',textContent:'Khối Vận hành'},{value:'2',textContent:'Khối hai'}];
+ api.init([a,b],{scope:()=>new URLSearchParams(query),get});api.setData({});await tick();
+ assert.equal(api.rate(0,0),null);assert.equal(api.rate(100,1),.99);assert.equal(a.option.yAxis.data.length,2);assert.equal(new Set(a.option.yAxis.data).size,2);
+ assert.deepEqual(Array.from(b.option.yAxis.data),['11','12','21']);assert.equal(b.option.xAxis.min,0);assert.equal(b.option.xAxis.max,1);
+ const allRate=b.option.series[0].data[0].value,allTooltip=b.option.tooltip.formatter([{dataIndex:0}]);b.click({data:{id:11}});await tick();const allRows=JSON.stringify(node('requirement-people').children.map(r=>r.children.slice(1).map(c=>c.textContent)));const allScope=new URLSearchParams(requests.at(-1).p);node('requirement-close').click();
+ node('mode-division').click();await tick();b.click({componentType:'yAxis',value:'1'});await tick();assert.equal(b.option.series[0].data[0].value,allRate);assert.equal(b.option.tooltip.formatter([{dataIndex:0}]),allTooltip);b.click({data:{id:11}});await tick();assert.equal(requests.at(-1).p.get('DrillDepartmentId'),allScope.get('DrillDepartmentId'));assert.equal(JSON.stringify(node('requirement-people').children.map(r=>r.children.slice(1).map(c=>c.textContent))),allRows);node('requirement-close').click();node('mode-all').click();await tick();assert.deepEqual(Array.from(b.option.yAxis.data),['11','12','21']);assert(!requests.at(-1).p.has('DrillDivisionId'));
+ node('mode-division').click();await tick();
+ const initialRight=b.option; a.click({data:{id:101}});await tick();assert.strictEqual(b.option,initialRight);assert.equal(requests.at(-1).p.get('DrillTypeId'),'101');
+ a.click({data:{id:1}});await tick();assert.equal(requests.at(-1).p.get('DrillDivisionId'),'1');assert.equal(requests.at(-1).p.get('DrillTypeId'),'101');assert.deepEqual(Array.from(a.option.yAxis.data),['11']);
+ a.click({data:{id:11}});await tick();assert(node('requirement-detail').open);assert(node('requirement-summary').textContent.includes('1 cán bộ'));assert.equal(exportParams().get('DrillTypeId'),'101');assert.equal(exportParams().get('DrillDepartmentId'),'11');
+ const link=node('requirement-people').children[0].children[0].children[0];assert(link.href.includes('returnUrl=')&&decodeURIComponent(link.href).includes('pd_first_type=101'));
+ node('requirement-close').click();assert(!node('requirement-detail').open);node('requirement-first-back').click();await tick();assert.equal(requests.at(-1).p.get('DrillTypeId'),'101');
+ node('requirement-first-back').click();await tick();assert(!requests.at(-1).p.has('DrillTypeId'));
+ b.click({data:{id:1}});await tick();assert(node('requirement-second-title').textContent.includes('Tỷ lệ đáp ứng hồ sơ – Khối Vận hành'));assert(b.option.tooltip.formatter([{dataIndex:1}]).includes('99'));b.click({data:{id:12}});await tick();assert(node('requirement-detail').open);assert(node('requirement-summary').textContent.includes('0 cán bộ'));node('requirement-close').click();
+ // A delayed response cannot overwrite a newer back-navigation request, even if transport ignores abort.
+ let release;hold=new Promise(r=>release=r);a.click({data:{id:101}});node('requirement-first-back').click();await tick();release([point(999,'STALE',1,1,1)]);await tick();assert(!a.option.yAxis.data.includes('999'));
+ // Two division clicks in the same displayed level: last request wins.
+ node('requirement-second-back').click();await tick();
+ let releaseDivision;hold=new Promise(r=>releaseDivision=r);b.click({data:{id:1,level:'divisions'}});b.click({data:{id:2,level:'divisions'}});await tick();assert.deepEqual(Array.from(b.option.yAxis.data),['21']);releaseDivision([point(11,'OLD',1,1,1)]);await tick();assert.deepEqual(Array.from(b.option.yAxis.data),['21']);
+ assert.equal(b.option.title?.subtext,undefined);
+ query=new URLSearchParams('DivisionIds=2&DepartmentIds=21&EmployeeIds=TEST0001&Groups=Hồ sơ gốc');api.clear();api.setData({});await tick();assert(!requests.at(-1).p.has('DrillDivisionId'));assert.equal(requests.at(-1).p.get('DepartmentIds'),'21');assert.equal(requests.at(-1).p.get('EmployeeIds'),'TEST0001');assert(!requests.at(-1).p.has('DrillTypeId'));
+ assert(node('requirement-second-back').hidden);a.click({data:{id:101}});await tick();assert.equal(requests.at(-1).p.get('Level'),'departments');node('requirement-first-back').click();await tick();assert.equal(requests.at(-1).p.get('Level'),'types');
+ b.click({data:{id:21}});await tick();node('requirement-search input').value='absent';node('requirement-search').events.submit({preventDefault(){},currentTarget:node('requirement-search')});await tick();assert(node('requirement-summary').textContent.includes('0 cán bộ'));assert(node('requirement-people').children[0].children[0].textContent.includes('Không có cán bộ thiếu'));
+ node('expiring-tab').click();assert(node('problem-panel').hidden);node('problem-tab').click();assert(node('expiring-panel').hidden);
+ for(const width of [1440,1366,768,390]){a.dom.clientWidth=width;b.dom.clientWidth=width;api.resize();assert.equal(a.dom.style.minWidth,'0');}
+ console.log('PASS problem drill: ID keys, independent charts, type/scope retention, detail/export scope, back/reset, stale response, empty result, keyboard alternatives and resize logic (simulated DOM).');
+})().catch(e=>{console.error(e);process.exitCode=1;});

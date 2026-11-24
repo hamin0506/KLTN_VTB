@@ -9,6 +9,11 @@ using Vtb.Hr.Web.Services;
 namespace Vtb.Hr.Web.Controllers;
 public class CatalogController(VtbContext db,CatalogService service,ILogger<CatalogController> logger,DocumentFileStore files):Controller
 {
+ private IActionResult ReturnToList(string kind,string? employeeId=null){
+  var target=NavigationContext.Return(Request);
+  if(target!=null)return LocalRedirect(target);
+  return !string.IsNullOrWhiteSpace(employeeId)?RedirectToAction("Details","Profiles",new{id=employeeId}):RedirectToAction(nameof(Index),new{kind});
+ }
  public async Task<IActionResult> Index(string kind,Filter f)=>kind switch{
   "employees"=>View("Grid",await service.List<Employee>(kind,f)),"qualifications"=>View("Grid",await service.List<Qualification>(kind,f)),"documents" when string.IsNullOrWhiteSpace(f.EmployeeId)=>RedirectToAction(nameof(Index),new{kind="types"}),"documents"=>View("Grid",await service.List<Document>(kind,f)),"types"=>View("Grid",await service.List<DocumentType>(kind,f)),"rules"=>View("Grid",await service.List<RequirementRule>(kind,f)),_=>NotFound()};
  [Authorize(Policy="Admin")]
@@ -70,7 +75,7 @@ public class CatalogController(VtbContext db,CatalogService service,ILogger<Cata
     removing.FilePath=null;
    }
    if(entity is Document document){document.UpdatedAt=await db.Database.SqlQuery<DateTime>($"SELECT SYSDATETIME() AS [Value]").SingleAsync();}
-   if(id==null)db.Add(entity);await db.SaveChangesAsync();commitAttempted=true;await tx.CommitAsync();await tx.DisposeAsync();if(newFile!=null||removeAttachment)await files.CleanupUnusedAsync(oldFile,db);TempData["Success"]="Đã lưu dữ liệu thành công.";return entity is Qualification degree?RedirectToAction("Details","Profiles",new{id=degree.EmployeeId}):entity is Document saved?RedirectToAction("Details","Profiles",new{id=saved.EmployeeId}):RedirectToAction(nameof(Index),new{kind});
+   if(id==null)db.Add(entity);await db.SaveChangesAsync();commitAttempted=true;await tx.CommitAsync();await tx.DisposeAsync();if(newFile!=null||removeAttachment)await files.CleanupUnusedAsync(oldFile,db);TempData["Success"]="Đã lưu dữ liệu thành công.";return ReturnToList(kind,(entity as Qualification)?.EmployeeId??(entity as Document)?.EmployeeId);
   }catch(DbUpdateConcurrencyException){ModelState.AddModelError("","Bản ghi đã bị thay đổi hoặc xóa. Vui lòng tải lại.");}
   catch(DbUpdateException ex){logger.LogWarning(ex,"Save {Kind} failed",kind);if(entity is Document&&ex.InnerException is SqlException {Number:2601 or 2627})ModelState.AddModelError("DocumentTypeId","Cán bộ đã có tài liệu hiện hành thuộc loại này. Vui lòng chọn lại hoặc tải lại hồ sơ.");else ModelState.AddModelError("",ex.InnerException is SqlException {Number:2601 or 2627}?"Dữ liệu bị trùng mã hoặc tên.":"Không thể lưu do ràng buộc hoặc quyền truy cập. Kiểm tra dữ liệu và thử lại.");}
   catch(SqlException ex) when(ex.Number==1205){ModelState.AddModelError("","Dữ liệu đang được cập nhật đồng thời. Vui lòng thử lại.");}
@@ -88,11 +93,11 @@ public class CatalogController(VtbContext db,CatalogService service,ILogger<Cata
  {
   if(!CatalogService.Known(kind))return NotFound();
   try{await using var tx=await db.Database.BeginTransactionAsync(IsolationLevel.Serializable);var entity=await Find(kind,id);if(entity==null)return NotFound();
-   if(entity is DocumentType t&&await db.RequirementRules.AnyAsync(x=>x.DocumentTypeId==t.DocumentTypeId)){TempData["Error"]="Không thể xóa loại tài liệu đang có quy tắc hồ sơ.";return RedirectToAction(nameof(Index),new{kind});}
-   db.Remove(entity);await db.SaveChangesAsync();await tx.CommitAsync();TempData["Success"]="Đã xóa bản ghi.";if(entity is Qualification degree)return RedirectToAction("Details","Profiles",new{id=degree.EmployeeId});if(entity is Document removed){await tx.DisposeAsync();await files.CleanupUnusedAsync(removed.FilePath,db);return RedirectToAction("Details","Profiles",new{id=removed.EmployeeId});}
+   if(entity is DocumentType t&&await db.RequirementRules.AnyAsync(x=>x.DocumentTypeId==t.DocumentTypeId)){TempData["Error"]="Không thể xóa loại tài liệu đang có quy tắc hồ sơ.";return ReturnToList(kind);}
+   db.Remove(entity);await db.SaveChangesAsync();await tx.CommitAsync();TempData["Success"]="Đã xóa bản ghi.";if(entity is Qualification degree)return ReturnToList(kind,degree.EmployeeId);if(entity is Document removed){await tx.DisposeAsync();await files.CleanupUnusedAsync(removed.FilePath,db);return ReturnToList(kind,removed.EmployeeId);}
   }catch(DbUpdateException ex){logger.LogWarning(ex,"Delete {Kind} failed",kind);TempData["Error"]="Không thể xóa: bản ghi còn được tham chiếu, đã thay đổi hoặc bạn chưa có quyền ghi dữ liệu.";}
   catch(SqlException ex) when(ex.Number==1205){TempData["Error"]="Có cập nhật đồng thời. Vui lòng thử lại.";}
-  return RedirectToAction(nameof(Index),new{kind});
+  return ReturnToList(kind);
  }
 }
 

@@ -1,0 +1,6 @@
+@model DocumentSystemInfo
+@using System.Globalization
+<div class="document-system-meta">
+    <span>Ngày tạo: @(Model.CreatedAt?.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture) ?? "Chưa có thông tin")</span>
+    <span>Cập nhật lần cuối: @(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture) ?? "Chưa cập nhật")</span>
+</div>

@@ -27,15 +27,16 @@ window.EmployeeHierarchy=class {
  }
  open(id){if(this.rows.some(row=>row.divisionId===id)){this.division=id;this.mode='detail';this.render();}}
  setRows(rows){this.rows=rows;if(this.division!==null&&!rows.some(row=>row.divisionId===this.division)){this.division=null;if(this.mode==='detail')this.mode='division';}this.render();}
- clear(){this.rows=[];this.division=null;this.back.hidden=true;this.picker.replaceChildren();this.picker.disabled=true;this.breadcrumb.textContent='Chưa tải được dữ liệu';this.chart.clear();}
+ clear(){this.rows=[];this.division=null;this.back.hidden=true;this.picker.replaceChildren();this.picker.disabled=true;this.chart.clear();}
  render(){
   const view=EmployeeHierarchy.project(this.rows,this.mode,this.division);const divisions=new Map(this.rows.map(row=>[row.divisionId,row.parent]));
   this.picker.hidden=this.mode!=='detail';
-  this.back.hidden=this.mode!=='detail';this.breadcrumb.textContent=this.mode==='all'?'Tổng quan / Tất cả phòng ban':this.mode==='division'?'Tổng quan / Theo khối':'Theo khối > '+(this.division===null?'Chọn khối':EmployeeHierarchy.shortName(divisions.get(this.division)));
+  this.back.hidden=this.mode!=='detail';
   this.buttons.forEach(button=>{const active=button.dataset.employeeMode===this.mode;button.setAttribute('aria-pressed',String(active));button.classList.toggle('btn-primary',active);});
   this.picker.replaceChildren();const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='Chọn khối để xem phòng ban';placeholder.selected=this.division===null;this.picker.append(placeholder);
   for(const [id,name] of divisions){const option=document.createElement('option');option.value=id;option.textContent=EmployeeHierarchy.shortName(name);option.selected=id===this.division;this.picker.append(option);}this.picker.disabled=!this.rows.length;
-  this.element.setAttribute('aria-label',this.breadcrumb.textContent);
+  const title=document.getElementById('employee-chart-title');if(title)title.textContent='Tổng cán bộ'+(this.mode==='detail'&&this.division!==null?' – '+divisions.get(this.division):'');
+  this.element.setAttribute('aria-label',title?.textContent||'Tổng cán bộ');
   const wrapped=view.entries.map(x=>EmployeeHierarchy.wrapWords(x.label));
   const labelLines=Math.max(1,...wrapped.map(x=>x.split('\n').length));
   // Reserve a gap between category labels; unusually long single words stay intact.
@@ -48,7 +49,7 @@ window.EmployeeHierarchy=class {
    tooltip:{trigger:'axis',renderMode:'richText',confine:true,formatter:items=>{const index=items[0]?.dataIndex;if(index===undefined)return '';return [view.entries[index].fullLabel,...view.series.map(s=>s.name+': '+(s.data[index]===null?'(Trống)':number.format(s.data[index])))].join('\n');}},
    grid:{left:12,right:16,top:20,bottom:42,containLabel:true},
    xAxis:{type:'category',data:view.categories,triggerEvent:true,axisLabel:{interval:0,fontSize:11,lineHeight:18,margin:12,rotate:0,formatter:id=>EmployeeHierarchy.wrapWords(entries.get(String(id))?.label??'')}},
-   yAxis:{type:'value',minInterval:1},series:view.series.map(s=>({...s,barMaxWidth:10,barGap:'15%',barCategoryGap:'45%'}))
+   yAxis:{type:'value',minInterval:1},series:view.series.map(s=>({...s,cursor:this.mode==='division'?'pointer':'default',barMaxWidth:10,barGap:'15%',barCategoryGap:'45%'}))
   }:{title:{text:this.mode==='detail'&&this.division===null?'Chọn một khối để xem phòng ban':'Không có dữ liệu trong phạm vi đã chọn',left:'center',top:'middle',textStyle:{fontSize:13,fontWeight:'normal',color:'#68788a'}}},true);
   this.chart.resize();
  }
