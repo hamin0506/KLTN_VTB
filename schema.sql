@@ -383,29 +383,6 @@ required_documents AS
     CROSS JOIN active_rules ar
     JOIN document_type dt ON ar.document_type_id = dt.document_type_id
 	JOIN department d on d.department_id = e.department_id
-
-    --WHERE --loại các giấy tờ có điều kiện ko cần thiết với các nhân viên bình thường
-    --    --Hồ sơ bắt buộc cho tất cả 
-    --    (ar.requirement_level = 'BAT_BUOC'  AND dt.document_code NOT IN
-    --        (
-    --            'HDXDTH1',
-    --            'HDXDTH2',
-    --            'HDKXDTH'
-    --        ))
-    --    OR
-    --    --Hồ sơ của nhân viên quản lý 
-    --    (ar.requirement_level = 'CO_DIEU_KIEN' AND e.is_managerial = 1 AND dt.document_code IN
-    --        (
-    --            'QDBONHIEM', 'HSBONHIEM', 'KEKHAITS'
-    --        ))
-    --    OR
-    --    --Hồ sơ của nhân viên tạm hoãn 
-    --    (ar.requirement_level = 'CO_DIEU_KIEN' AND e.employment_status = 'TamHoanHDLD' AND dt.document_code = 'QDTAMHOAN')
-    --    OR
-    --    --Hồ sơ của nhân viên nghỉ hưu 
-    --    (ar.requirement_level = 'CO_DIEU_KIEN' AND e.employment_status = 'NghiHuu' AND dt.document_code = 'QDNGHIHUU')
-
-
 WHERE
 (
     -- 1. Nhân viên đang làm việc hoặc tạm hoãn HĐLĐ
